@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Claude — ten thoughtfully engineered interactions. A standalone, accessible, dependency-free motion collection.">
+  <title>Claude — The art of interaction</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ae492e'/%3E%3Ctext x='17' y='47' fill='%23fff' font-size='48' font-family='Georgia'%3Ec%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    /* One token system. Component hosts inherit these, or accept local overrides. */
+    :root {
+      --paper:#f5f3ed; --surface:#fffefa; --ink:#282a24; --muted:#686b61; --line:#d8d9ce;
+      --accent:#ae492e; --accent-soft:#f3e4da; --forest:#263c30; --sage:#dae2d0;
+      --success:#306143; --error:#a3292a; --on-accent:#fffaf3; --night:#23332b;
+      --sans:'DM Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
+      --serif:'Instrument Serif',Iowan Old Style,Georgia,serif;
+      --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+      --text-xs: .72rem; --text-sm:clamp(.8rem,.76rem + .12vw,.9rem);
+      --text-base:clamp(.92rem,.85rem + .2vw,1.05rem); --text-title:clamp(1.8rem,1.25rem + 2vw,3.2rem);
+      --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem;
+      --space-5:1.5rem; --space-6:2rem; --space-7:3rem; --space-8:4rem;
+      --radius-sm:8px; --radius:16px; --radius-lg:24px; --radius-pill:999px;
+      --shadow:0 12px 36px #23332b0d; --shadow-float:0 24px 80px #10191030;
+      --ease:cubic-bezier(.22,1,.36,1); --ease-in:cubic-bezier(.55,0,.75,.2);
+      --fast:160ms; --normal:360ms; --slow:760ms; --stagger:70ms;
+      --touch:44px; --page-gutter:clamp(1.1rem,5vw,5rem); --page-max:1440px;
+    }
+    [data-theme="dark"] {
+      color-scheme:dark; --paper:#1b211d; --surface:#232b25; --ink:#efefe4; --muted:#b1b8a8;
+      --line:#414b3e; --accent:#ef9879; --accent-soft:#3a3026; --forest:#bdcfae;
+      --sage:#354733; --success:#a1d1ad; --error:#ffaaa1; --on-accent:#251c16;
+      --shadow:0 12px 36px #00000020;
+    }
+    @property --depth { syntax:'<number>'; inherits:true; initial-value:0; }
+    *,*::before,*::after { box-sizing:border-box; }
+    html { background:var(--paper); color:var(--ink); scroll-behavior:smooth; scroll-padding-block-start:6rem; }
+    body { margin:0; font:400 var(--text-base)/1.6 var(--sans); -webkit-font-smoothing:antialiased; }
+    h1,h2,h3,p,figure,blockquote { margin:0; }
+    h1,h2,h3 { line-height:1.12; font-weight:500; }
+    a { color:inherit; text-decoration:none; }
+    button,input,select,textarea { font:inherit; color:inherit; }
+    button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+    button { cursor:pointer; min-inline-size:var(--touch); }
+    button { border:0; background:none; }
+    button:disabled { cursor:default; opacity:.55; }
+    button,a { touch-action:manipulation; }
+    button, input:not([type=checkbox]), select { min-block-size:var(--touch); }
+    input[type=range] { min-inline-size:0; inline-size:100%; accent-color:var(--accent); cursor:ew-resize; }
+    input,textarea { min-inline-size:0; }
+    svg { display:block; max-inline-size:100%; }
+    [hidden] { display:none !important; }
+    :focus-visible { outline:2px solid var(--accent); outline-offset:5px; border-radius:var(--radius-sm); }
+    ::selection { background:var(--sage); color:var(--ink); }
+    .sr-only { position:absolute; inline-size:1px; block-size:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+    .skip { position:fixed; inset-block-start:var(--space-3); inset-inline-start:var(--space-3); z-index:100; transform:translateY(-200%); background:var(--surface); padding:var(--space-3) var(--space-5); }
+    .skip:focus { transform:none; }
+    .icon { inline-size:20px; block-size:20px; flex:none; }
+    .eyebrow { font:500 var(--text-xs)/1.5 var(--mono); letter-spacing:.11em; text-transform:uppercase; }
+    .muted { color:var(--muted); }
+    .serif { font-family:var(--serif); font-weight:400; }
+    .row { display:flex; align-items:center; gap:var(--space-3); }
+    .between { justify-content:space-between; }
+    .wrap { flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:var(--space-3); min-inline-size:var(--touch); min-block-size:var(--touch); padding:var(--space-3) var(--space-5); border-radius:var(--radius-pill); border:1px solid var(--line); font-size:var(--text-sm); font-weight:500; background:var(--surface); transition:transform var(--fast) var(--ease); }
+    .btn:hover { transform:translateY(-2px); }
+    .btn:active { transform:scale(.97); }
+    .btn-primary { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+    .btn-accent { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+    .icon-btn { display:grid; place-items:center; min-inline-size:var(--touch); min-block-size:var(--touch); border:1px solid var(--line); border-radius:var(--radius-pill); background:var(--surface); }
+    .pill { display:inline-flex; align-items:center; gap:var(--space-2); padding:var(--space-1) var(--space-3); border:1px solid var(--line); border-radius:var(--radius-pill); font:var(--text-xs)/1.6 var(--mono); white-space:nowrap; }
+    .dot { inline-size:6px; block-size:6px; background:var(--success); border-radius:50%; display:inline-block; flex:none; }
+    .lab-bar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; padding:var(--space-3) var(--space-5); background:var(--surface); border-block-end:1px solid var(--line); position:relative; z-index:40; }
+    .lab-brand { display:flex; align-items:center; gap:var(--space-3); font-size:var(--text-sm); }
+    .lab-brand>a { display:grid; place-items:center; min-inline-size:var(--touch); min-block-size:var(--touch); }
+    .lab-tools { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-3); }
+    .viewport-control { display:flex; align-items:center; gap:var(--space-3); font:var(--text-xs)/1 var(--mono); }
+    .viewport-control input { inline-size:clamp(70px,11vw,180px); }
+    .viewport-control output { min-inline-size:58px; }
+    .toolbar-label { font-size:var(--text-xs); }
+    .preview-wrap.is-live { display:flex; justify-content:center; overflow:hidden; background:repeating-linear-gradient(45deg,var(--line) 0 1px,transparent 1px 10px),var(--paper); }
+    .preview-frame { flex:none; border:0; background:var(--paper); transform-origin:top center; }
+    .page { max-inline-size:var(--page-max); margin-inline:auto; padding-inline:var(--page-gutter); container-type:inline-size; }
+    .site-nav { display:flex; align-items:center; justify-content:space-between; gap:var(--space-5); padding-block:var(--space-5); border-block-end:1px solid var(--line); }
+    .wordmark { display:flex; align-items:center; gap:var(--space-3); min-block-size:var(--touch); font-size:1.4rem; font-weight:600; letter-spacing:-.07em; }
+    .brand-symbol { color:var(--accent); font-size:2rem; line-height:1; font-weight:400; }
+    .nav-links { display:flex; gap:var(--space-5); align-items:center; font-size:var(--text-sm); }
+    .nav-links a { display:flex; align-items:center; min-block-size:var(--touch); }
+    .nav-links a:hover { color:var(--accent); }
+    .nav-command { display:flex; justify-content:center; gap:var(--space-5); align-items:center; min-inline-size:var(--touch); min-block-size:var(--touch); font-size:var(--text-sm); }
+    kbd { font:var(--text-xs)/1.5 var(--mono); border:1px solid var(--line); background:var(--paper); border-radius:5px; padding:.2rem .4rem; color:var(--muted); }
+    .section { padding-block:clamp(2.5rem,5vw,5rem); border-block-end:1px solid var(--line); scroll-margin-block-start:var(--space-5); }
+    .section-heading { display:flex; align-items:end; justify-content:space-between; gap:var(--space-5); margin-block-end:var(--space-6); }
+    .section-heading h2 { font-size:var(--text-title); letter-spacing:-.045em; }
+    .section-heading p { max-inline-size:360px; font-size:var(--text-sm); color:var(--muted); }
+    .section-heading .eyebrow { margin-block-end:var(--space-3); color:var(--accent); }
+    .spec-label { display:flex; align-items:center; gap:var(--space-3); font:var(--text-xs)/1.5 var(--mono); color:var(--muted); margin-block-end:var(--space-4); }
+    .spec-number { color:var(--accent); }
+    .spec-note { margin-inline-start:auto; }
+    .panel { position:relative; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface); box-shadow:var(--shadow); padding:clamp(1.1rem,3cqw,2.25rem); overflow:hidden; min-inline-size:0; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-5); }
+    .two-col>* { min-inline-size:0; }
+    .copy { max-inline-size:52ch; color:var(--muted); }
+    .intro { display:grid; grid-template-columns:1.3fr 1fr; align-items:center; min-block-size:clamp(540px,50vw,720px); gap:var(--space-6); padding-block:var(--space-7); position:relative; }
+    .intro-copy { position:relative; z-index:2; }
+    .intro h1 { font-size:clamp(3.5rem,7.6cqw,7rem); line-height:.99; letter-spacing:-.065em; margin-block:var(--space-5); }
+    .intro h1 em { color:var(--accent); font-weight:400; letter-spacing:-.045em; }
+    .intro .copy { max-inline-size:34ch; margin-block:var(--space-5) var(--space-6); }
+    .hero-foot { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-4); padding-block:var(--space-5); border-block:1px solid var(--line); font:var(--text-xs)/1.5 var(--mono); }
+    .hero-meta { display:flex; gap:var(--space-5); flex-wrap:wrap; }
+    .word { display:inline-block; }
+    .word-wrap { display:inline-block; overflow:hidden; vertical-align:bottom; padding-block:.08em; padding-inline-end:.16em; margin-inline-end:-.16em; }
+    .hero-art { position:relative; aspect-ratio:1; isolation:isolate; perspective:900px; inline-size:100%; max-inline-size:560px; overflow:hidden; }
+    .art-halo { position:absolute; inset:5%; border-radius:50%; background:radial-gradient(circle at 40% 32%,#f4f0d8,var(--sage) 52%,transparent 73%); opacity:.8; }
+    .orb { position:absolute; inset:14%; border-radius:50%; background:radial-gradient(circle at 30% 25%,#a8b18c 0,#6b7b59 18%,#364f3d 45%,#152e22 70%,#0b2117 100%); box-shadow:inset -14px -20px 36px #05120a66,0 32px 70px #263c302b; overflow:hidden; }
+    .orb::after { content:''; position:absolute; inset:0; border-radius:50%; opacity:.24; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.5' filter='url(%23n)'/%3E%3C/svg%3E"); mix-blend-mode:soft-light; }
+    .orb-grid { position:absolute; inset:0; transform:rotate(-24deg); }
+    .orb-ring { position:absolute; inset:calc(var(--ring) * 3.6%); border:1px solid #e0e6c955; border-radius:50%; transform:rotateX(calc(var(--ring) * 7deg)); }
+    .orb-longitude { position:absolute; inset:0; border:1px solid #e0e6c938; border-radius:50%; transform:rotateY(calc(var(--ring) * 15deg)); }
+    .orbit { position:absolute; inset:3%; border:1px solid var(--line); border-radius:50%; transform:rotateX(62deg) rotateZ(-35deg); }
+    .orbit-two { inset:-2%; transform:rotateX(68deg) rotateZ(37deg); }
+    .art-label { position:absolute; inset-block-start:17%; inset-inline-end:1%; background:var(--surface); border:1px solid var(--line); padding:var(--space-3) var(--space-4); border-radius:var(--radius-sm); box-shadow:var(--shadow); font:var(--text-xs)/1.5 var(--mono); transform:rotate(4deg); }
+    .art-label-two { inset-block-start:auto; inset-block-end:16%; inset-inline-start:0; inset-inline-end:auto; transform:rotate(-5deg); }
+    .art-cross { position:absolute; inset-inline-start:9%; inset-block-start:22%; color:var(--accent); font-size:2rem; }
+    .art-coordinate { position:absolute; inset-inline-end:9%; inset-block-end:3%; font:var(--text-xs)/1.5 var(--mono); color:var(--muted); }
+    c-command,c-hero,c-bento,c-pricing,c-carousel,c-data,c-form,c-nav,c-marquee,c-toasts { display:block; min-inline-size:0; position:relative; container-type:inline-size; }
+    .state-panel { display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; gap:var(--space-4); min-block-size:240px; padding:var(--space-6); border:1px dashed var(--line); border-radius:var(--radius); }
+    .state-panel p { color:var(--muted); max-inline-size:32ch; }
+    .state-glyph { font:3rem/1 var(--serif); color:var(--accent); }
+    .command-visual { min-block-size:310px; display:flex; align-items:center; justify-content:center; background:radial-gradient(ellipse at 50% 80%,var(--sage),transparent 65%),var(--surface); }
+    .mini-command { inline-size:min(100%,360px); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:var(--space-3); box-shadow:var(--shadow-float); transform:rotate(-2deg); }
+    .mini-search { display:flex; gap:var(--space-3); padding:var(--space-3); border-block-end:1px solid var(--line); font-size:var(--text-sm); color:var(--muted); }
+    .mini-command button { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); text-align:start; inline-size:100%; padding:var(--space-3); font-size:var(--text-sm); border-radius:var(--radius-sm); }
+    .mini-command button:hover { background:var(--paper); }
+    .mini-command button:first-of-type { background:var(--accent-soft); }
+    .command-caption { text-align:center; margin-block-start:var(--space-5); font-size:var(--text-xs); color:var(--muted); }
+    dialog { border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface); color:var(--ink); padding:0; max-inline-size:calc(100% - 2rem); max-block-size:calc(100dvh - 2rem); box-shadow:var(--shadow-float); }
+    dialog::backdrop { background:#0d191166; backdrop-filter:blur(6px); }
+    .palette { inline-size:540px; margin-block-start:clamp(1rem,16vh,12rem); overflow:hidden; }
+    .palette-search { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); border-block-end:1px solid var(--line); }
+    .palette-search input { border:0; background:transparent; inline-size:100%; outline-offset:0; }
+    .palette-results { padding:var(--space-3); max-block-size:min(370px,52dvh); overflow-y:auto; }
+    .palette-group { padding:var(--space-3); font:var(--text-xs)/1.5 var(--mono); color:var(--muted); text-transform:uppercase; }
+    .palette-option { display:flex; align-items:center; gap:var(--space-3); min-block-size:48px; padding:var(--space-3); border-radius:var(--radius-sm); font-size:var(--text-sm); cursor:pointer; }
+    .palette-option[aria-selected=true] { background:var(--accent-soft); }
+    .palette-option .option-hint { margin-inline-start:auto; color:var(--muted); font:var(--text-xs)/1.5 var(--mono); }
+    .palette-footer { display:flex; flex-wrap:wrap; gap:var(--space-4); padding:var(--space-3) var(--space-4); background:var(--paper); font-size:var(--text-xs); color:var(--muted); }
+    .no-results { padding:var(--space-6); text-align:center; color:var(--muted); }
+    .bento { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:var(--space-4); }
+    .bento-card { position:relative; min-block-size:290px; display:flex; flex-direction:column; justify-content:space-between; padding:var(--space-5); border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); overflow:hidden; transform-style:preserve-3d; }
+    .bento-card>*:not(.spotlight) { position:relative; z-index:1; }
+    .bento-card h3 { font-size:1.15rem; margin-block-end:var(--space-2); }
+    .bento-card p { color:var(--muted); font-size:var(--text-sm); }
+    /* The decorative spotlight shares the physical X axis of PointerEvent. */
+    .spotlight { position:absolute; inset-block-start:-160px; left:-160px; inline-size:320px; block-size:320px; border-radius:50%; background:radial-gradient(circle,var(--sage),transparent 68%); opacity:0; pointer-events:none; transition:opacity var(--normal) var(--ease); }
+    .bento-card:hover .spotlight,.bento-card:focus-within .spotlight { opacity:.65; }
+    .bento-card .spotlight-border { display:none; position:absolute; inset:0; padding:1px; border-radius:inherit; overflow:hidden; pointer-events:none; z-index:2; }
+    .spotlight-border .spotlight { background:radial-gradient(circle,var(--accent),transparent 65%); }
+    @supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)) {
+      .bento-card .spotlight-border { display:block; -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
+    }
+    .bento-feature { background:var(--night); color:#f0f1e4; }
+    .bento-feature p { color:#bcc9b5; }
+    .bento-feature .pill { border-color:#57715a; }
+    .spring-lines { display:flex; align-items:center; justify-content:center; min-block-size:135px; gap:var(--space-2); }
+    .spring-lines span { display:block; inline-size:12px; block-size:calc(30px + var(--bar) * 16px); border-radius:var(--radius-pill); background:linear-gradient(#e0e6c9,#738a65); transform-origin:center; }
+    .bento-glyph { display:flex; justify-content:center; align-items:center; min-block-size:140px; font:6rem/1 var(--serif); color:var(--accent); }
+    .focus-art { display:flex; justify-content:center; align-items:center; gap:var(--space-2); min-block-size:140px; }
+    .focus-art span { display:grid; place-items:center; inline-size:56px; block-size:56px; border:1px solid var(--line); border-radius:var(--radius-sm); font:1rem/1 var(--mono); background:var(--paper); }
+    .focus-art span:nth-child(2) { border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft); }
+    .billing { position:relative; display:inline-grid; grid-template-columns:1fr 1fr; padding:4px; border:1px solid var(--line); border-radius:var(--radius-pill); background:var(--paper); margin-block-end:var(--space-5); }
+    .billing-indicator { position:absolute; inset:4px auto 4px 4px; inline-size:calc(50% - 4px); border-radius:var(--radius-pill); background:var(--surface); box-shadow:var(--shadow); transition:transform var(--normal) var(--ease); }
+    [dir=rtl] .billing-indicator { inset-inline-start:4px; inset-inline-end:auto; }
+    .billing button { position:relative; z-index:1; padding-inline:var(--space-4); min-inline-size:108px; font-size:var(--text-sm); }
+    .pricing-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-4); }
+    .price-card { display:flex; flex-direction:column; position:relative; padding:var(--space-5); border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .price-card.featured { background:var(--night); color:#f0f1e4; border-color:var(--night); }
+    .featured .muted { color:#bcc9b5; }
+    .price-top { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); flex-wrap:wrap; }
+    .price-card .pill { color:var(--on-accent); background:var(--accent); border-color:var(--accent); }
+    .price-card h3 { font-size:1.1rem; }
+    .price { display:flex; align-items:baseline; gap:var(--space-2); margin-block:var(--space-5) var(--space-2); font-size:clamp(2.3rem,5cqw,4rem); letter-spacing:-.06em; line-height:1.15; font-weight:500; font-variant-numeric:tabular-nums; }
+    .price small { font-size:var(--text-xs); letter-spacing:0; color:var(--muted); }
+    .featured .price small { color:#bcc9b5; }
+    .digits { display:inline-flex; direction:ltr; overflow:hidden; block-size:1.15em; }
+    .digit { display:inline-block; inline-size:.62em; position:relative; }
+    .digit-strip { display:flex; flex-direction:column; }
+    .digit-strip span { block-size:1.15em; flex:none; text-align:center; }
+    .price-card ul { list-style:none; padding:0; margin-block:var(--space-5) var(--space-6); flex:1; font-size:var(--text-sm); }
+    .price-card li { display:flex; gap:var(--space-3); align-items:baseline; margin-block:var(--space-3); }
+    .price-card li::before { content:'↗'; color:var(--accent); }
+    .billing-caption { color:var(--muted); font-size:var(--text-xs); margin-block-start:var(--space-4); }
+    .carousel-viewport { overflow-x:auto; scroll-snap-type:x mandatory; border-radius:var(--radius-lg); touch-action:auto; cursor:grab; }
+    .carousel-viewport.is-enhanced { overflow:hidden; scroll-snap-type:none; touch-action:pan-y pinch-zoom; }
+    .carousel-viewport.dragging { cursor:grabbing; user-select:none; }
+    .carousel-track { display:flex; gap:var(--space-4); direction:ltr; }
+    .scene { flex:0 0 72%; min-inline-size:0; scroll-snap-align:start; border-radius:var(--radius-lg); background:var(--sage); min-block-size:380px; position:relative; overflow:hidden; padding:var(--space-6); display:flex; flex-direction:column; justify-content:space-between; isolation:isolate; }
+    .scene:nth-child(2) { background:#e8dcd1; }
+    .scene:nth-child(3) { background:#d9dce6; }
+    .scene:nth-child(4) { background:#dce3de; }
+    .scene-copy { position:relative; z-index:1; color:#26332a; direction:inherit; }
+    :root[dir=rtl] .scene-copy,:root[dir=rtl] .quote { direction:rtl; }
+    .scene h3 { font:clamp(2.8rem,7cqw,5rem)/1 var(--serif); letter-spacing:-.045em; max-inline-size:8ch; }
+    .scene p { font:var(--text-xs)/1.6 var(--mono); margin-block-start:var(--space-4); }
+    .scene-art { position:absolute; inline-size:52%; aspect-ratio:1; inset-inline-end:5%; inset-block-start:12%; }
+    .scene-sphere { border-radius:50%; background:radial-gradient(circle at 32% 25%,#f2f4dc,#a9bb87 28%,#4c6847 62%,#233f29); box-shadow:20px 40px 60px #29472c30; }
+    .scene-arch { border-radius:50% 50% 10% 10%; background:linear-gradient(125deg,#efbd9b,#c57856 60%,#743f2d); transform:rotate(-15deg); box-shadow:20px 40px 60px #74422630; }
+    .scene-fold { background:linear-gradient(125deg,#b3b9de,#727ea7 50%,#495574); clip-path:polygon(50% 0,100% 38%,80% 100%,12% 80%,0 30%); transform:rotate(15deg); }
+    .scene-ring { border-radius:50%; border:clamp(20px,6cqw,70px) solid #5c8270; box-shadow:inset 12px 12px 24px #30584450,20px 40px 60px #30584430; transform:rotateX(35deg) rotateZ(-20deg); }
+    .carousel-controls { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3); margin-block-start:var(--space-5); }
+    .carousel-dots { display:flex; }
+    .carousel-dots button { min-inline-size:var(--touch); min-block-size:var(--touch); display:grid; place-items:center; }
+    .carousel-dots button::after { content:''; inline-size:6px; block-size:6px; border-radius:50%; background:var(--line); }
+    .carousel-dots button[aria-current=true]::after { background:var(--accent); transform:scale(1.3); }
+    .kpi { display:flex; align-items:baseline; gap:var(--space-4); margin-block:var(--space-5) var(--space-2); }
+    .kpi strong { font-weight:500; font-size:clamp(2.2rem,7cqw,3.8rem); line-height:1; letter-spacing:-.055em; font-variant-numeric:tabular-nums; }
+    .trend { color:var(--success); font-size:var(--text-xs); }
+    .chart { position:relative; min-block-size:150px; margin-block:var(--space-5) var(--space-3); outline-offset:4px; touch-action:pan-y; }
+    .chart svg { inline-size:100%; block-size:150px; overflow:visible; }
+    .chart-reveal { overflow:hidden; }
+    .chart-grid { stroke:var(--line); stroke-dasharray:3 5; stroke-width:1; }
+    .chart-path { fill:none; stroke:var(--accent); stroke-width:2.6; vector-effect:non-scaling-stroke; stroke-linecap:round; stroke-linejoin:round; }
+    .chart-area { fill:url(#chart-fill); }
+    .chart-cursor { position:absolute; inset-block:0; inset-inline-start:0; inline-size:1px; background:var(--accent); opacity:0; pointer-events:none; }
+    .chart-cursor::after { content:''; position:absolute; inset-block-start:var(--dot-y,50%); inline-size:9px; block-size:9px; border-radius:50%; background:var(--accent); outline:4px solid var(--surface); transform:translate(-50%,-50%); }
+    .chart-labels { display:flex; justify-content:space-between; color:var(--muted); font:var(--text-xs)/1.5 var(--mono); }
+    .data-footer { display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:center; justify-content:space-between; margin-block-start:var(--space-5); border-block-start:1px solid var(--line); padding-block-start:var(--space-4); }
+    .data-footer button { font-size:var(--text-xs); }
+    .form-layout { display:grid; grid-template-columns:.85fr 1.15fr; gap:var(--space-7); align-items:start; }
+    .form-layout h3 { font:clamp(2.5rem,5cqw,4.5rem)/1.03 var(--serif); letter-spacing:-.035em; margin-block:var(--space-4); }
+    .form-layout .copy { font-size:var(--text-sm); max-inline-size:30ch; }
+    .form-progress { display:flex; gap:var(--space-2); margin-block-end:var(--space-5); }
+    .form-progress span { block-size:3px; flex:1; background:var(--line); border-radius:var(--radius-pill); position:relative; overflow:hidden; }
+    .form-progress span::after { content:''; position:absolute; inset:0; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform var(--normal) var(--ease); }
+    .form-progress span.active::after { transform:scaleX(1); }
+    [dir=rtl] .form-progress span::after { transform-origin:right; }
+    .field { display:flex; flex-direction:column; gap:var(--space-2); margin-block:var(--space-4); }
+    .field label { font-size:var(--text-sm); }
+    .field input,.field select,.field textarea { inline-size:100%; padding:var(--space-3) var(--space-4); border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--paper); }
+    .field input[aria-invalid=true] { border-color:var(--error); }
+    .field-error { color:var(--error); font-size:var(--text-xs); min-block-size:1.4em; }
+    .form-step { border:0; padding:0; margin:0; min-inline-size:0; }
+    .form-step legend { font-size:1.05rem; font-weight:500; margin-block-end:var(--space-3); }
+    .form-actions { display:flex; align-items:center; gap:var(--space-3); justify-content:space-between; margin-block-start:var(--space-5); }
+    .review { display:grid; grid-template-columns:auto 1fr; gap:var(--space-3) var(--space-5); margin:var(--space-5) 0; font-size:var(--text-sm); }
+    .review dt { color:var(--muted); }
+    .review dd { margin:0; overflow-wrap:anywhere; }
+    .consent { display:flex; align-items:start; gap:var(--space-3); min-block-size:var(--touch); font-size:var(--text-sm); cursor:pointer; }
+    .consent input { min-inline-size:20px; inline-size:20px; block-size:20px; accent-color:var(--accent); margin-block-start:3px; }
+    .success-view { text-align:center; padding-block:var(--space-6); }
+    .success-mark { display:grid; place-items:center; inline-size:72px; block-size:72px; margin:0 auto var(--space-5); border-radius:50%; color:var(--success); background:var(--sage); font-size:2rem; }
+    .success-view h4 { font:2.5rem/1.1 var(--serif); margin-block:var(--space-4); }
+    .success-view p { color:var(--muted); font-size:var(--text-sm); margin-block-end:var(--space-5); }
+    .mega-demo { min-block-size:330px; overflow:visible; }
+    .mega-bar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); border-block-end:1px solid var(--line); padding-block-end:var(--space-3); }
+    .mega-brand { font:1.7rem/1 var(--serif); }
+    .mega-triggers { display:flex; gap:var(--space-2); }
+    .mega-triggers button { padding-inline:var(--space-3); font-size:var(--text-sm); border-radius:var(--radius-sm); }
+    .mega-triggers button[aria-expanded=true] { background:var(--paper); }
+    .mega-panel { position:absolute; inset-inline:var(--space-5); inset-block-start:90px; border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); padding:var(--space-4); box-shadow:var(--shadow); z-index:5; transform-origin:top left; }
+    .mega-content { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); }
+    .mega-content a { min-block-size:var(--touch); padding:var(--space-3); border-radius:var(--radius-sm); font-size:var(--text-sm); }
+    .mega-content a:hover { background:var(--paper); }
+    .mega-content small { display:block; color:var(--muted); font-size:var(--text-xs); margin-block-start:var(--space-1); }
+    .mega-placeholder { text-align:center; padding-block:var(--space-7); color:var(--muted); font:1.65rem/1.2 var(--serif); }
+    .drawer-trigger { display:none; }
+    .mobile-drawer { inline-size:360px; padding:var(--space-5); }
+    .mobile-drawer nav { display:flex; flex-direction:column; margin-block-start:var(--space-5); }
+    .mobile-drawer a { padding-block:var(--space-4); min-block-size:var(--touch); border-block-end:1px solid var(--line); }
+    .marquee-mask { overflow:hidden; -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
+    .marquee-track { display:flex; gap:var(--space-4); inline-size:max-content; animation:marquee 38s linear infinite; direction:ltr; }
+    .marquee-track:hover,.marquee-track:focus-within,[data-paused] .marquee-track { animation-play-state:paused; }
+    .quote { flex:none; inline-size:clamp(250px,35cqw,370px); padding:var(--space-5); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); direction:inherit; }
+    .quote blockquote { font:1.5rem/1.3 var(--serif); margin-block:var(--space-4) var(--space-5); }
+    .quote cite { font-style:normal; font-size:var(--text-sm); }
+    .avatar { display:grid; place-items:center; inline-size:38px; block-size:38px; background:var(--sage); border-radius:50%; color:var(--ink); font:var(--text-xs)/1 var(--mono); }
+    @keyframes marquee { to { transform:translateX(calc(-50% - .5rem)); } }
+    .toast-preview { background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:var(--space-4); display:flex; gap:var(--space-3); align-items:start; margin-block:var(--space-5); }
+    .toast-preview strong { display:block; font-size:var(--text-sm); font-weight:500; }
+    .toast-preview p { color:var(--muted); font-size:var(--text-xs); }
+    .toast-glyph { display:grid; place-items:center; inline-size:28px; block-size:28px; color:var(--success); background:var(--sage); border-radius:50%; flex:none; }
+    .toast-actions { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+    .toast-actions button { font-size:var(--text-xs); padding-inline:var(--space-3); }
+    .toast-stack { position:fixed; inset-inline-end:var(--space-5); inset-block-end:max(var(--space-5),env(safe-area-inset-bottom)); inline-size:min(370px,calc(100% - 2rem)); z-index:80; pointer-events:none; display:flex; flex-direction:column-reverse; gap:var(--space-3); }
+    .toast { display:flex; align-items:start; gap:var(--space-3); pointer-events:auto; padding:var(--space-4); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-float); touch-action:pan-y; }
+    .toast strong { display:block; font-size:var(--text-sm); font-weight:500; }
+    .toast > div { min-inline-size:0; overflow-wrap:anywhere; }
+    .toast p { color:var(--muted); font-size:var(--text-xs); }
+    .toast .icon-btn { margin-inline-start:auto; flex:none; border:0; background:transparent; }
+    .toast[data-kind=error] .toast-glyph { color:var(--error); background:var(--accent-soft); }
+    .queue-count { font:var(--text-xs)/1.5 var(--mono); color:var(--muted); margin-block-start:var(--space-4); }
+    .harness { margin-block:var(--space-7); padding:var(--space-5); border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .harness-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-4); }
+    .harness h2 { font-size:1.15rem; }
+    .harness-results { list-style:none; padding:0; margin:var(--space-4) 0 0; font:var(--text-xs)/1.7 var(--mono); }
+    .harness-results li { display:flex; gap:var(--space-3); padding-block:var(--space-2); overflow-wrap:anywhere; }
+    .pass { color:var(--success); } .fail { color:var(--error); }
+    .footer { padding-block:var(--space-6); display:flex; justify-content:space-between; gap:var(--space-5); align-items:start; flex-wrap:wrap; font-size:var(--text-xs); color:var(--muted); }
+    .footer .wordmark { color:var(--ink); }
+    .docs { border-block-start:1px solid var(--line); padding-block:var(--space-5); font-size:var(--text-sm); }
+    .docs summary { cursor:pointer; min-block-size:var(--touch); display:flex; align-items:center; }
+    .docs p { margin-block:var(--space-4); }
+    .docs code { font:var(--text-xs)/1.6 var(--mono); color:var(--accent); overflow-wrap:anywhere; }
+    .docs table { inline-size:100%; border-collapse:collapse; font-size:var(--text-xs); }
+    .docs td,.docs th { padding:var(--space-3); border-block-end:1px solid var(--line); text-align:start; vertical-align:top; overflow-wrap:anywhere; }
+    .probe-frame { position:fixed; inset-inline-start:-10000px; inset-block-start:0; inline-size:320px; block-size:844px; border:0; }
+    :where(p,h1,h2,h3,h4,button,a,legend) { overflow-wrap:anywhere; }
+    @supports (animation-timeline:view()) {
+      html:not([data-reduced]) .hero-art { animation:scroll-depth linear both; animation-timeline:view(); animation-range:entry 30% exit 80%; }
+      @keyframes scroll-depth { from { transform:translateY(24px); } to { transform:translateY(-40px); } }
+    }
+    @supports (view-transition-name:root) {
+      ::view-transition-old(root) { animation:theme-out 180ms var(--ease) both; }
+      ::view-transition-new(root) { animation:theme-in 400ms var(--ease) both; }
+      @keyframes theme-out { to { opacity:0; transform:scale(.985); } }
+      @keyframes theme-in { from { opacity:0; transform:scale(1.015); } }
+    }
+    @container (max-width:800px) {
+      .intro { grid-template-columns:1.15fr 1fr; min-block-size:480px; }
+      .intro h1 { font-size:clamp(3.4rem,8.6cqw,5.8rem); }
+      .bento { grid-template-columns:1fr 1fr; }
+      .bento-card:first-child { grid-column:1/-1; min-block-size:240px; }
+      .section-heading { align-items:start; }
+      .nav-links { gap:var(--space-4); }
+    }
+    @container (max-width:620px) {
+      .intro { grid-template-columns:1fr; padding-block:var(--space-6); gap:0; }
+      .intro h1 { font-size:clamp(3.25rem,15cqw,5.5rem); }
+      .hero-art { max-inline-size:420px; margin-inline:auto; }
+      .intro .copy { max-inline-size:40ch; }
+      .two-col,.form-layout { grid-template-columns:1fr; }
+      .pricing-grid { grid-template-columns:1fr; }
+      .price-card { padding:var(--space-5); }
+      .price { font-size:3.5rem; }
+      .price-card ul { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2); }
+      .section-heading { flex-direction:column; gap:var(--space-4); }
+      .section-heading p { max-inline-size:40ch; }
+      .nav-links { display:none; }
+      .nav-command>span { display:none; }
+      .scene { flex-basis:88%; min-block-size:320px; padding:var(--space-5); }
+      .scene h3 { font-size:3.7rem; }
+      .scene-art { inline-size:65%; inset-inline-end:-5%; inset-block-start:15%; }
+      .hero-meta { gap:var(--space-3); }
+      .form-layout { gap:var(--space-5); }
+      .spec-note { display:none; }
+    }
+    @container (max-width:400px) {
+      .bento { grid-template-columns:1fr; }
+      .bento-card:first-child { grid-column:auto; }
+      .mega-triggers { display:none; }
+      .drawer-trigger { display:grid; }
+      .mega-content { grid-template-columns:1fr; }
+      .mini-command { transform:none; }
+      .carousel-controls { gap:var(--space-2); }
+      .carousel-dots button { min-inline-size:var(--touch); }
+      .price-card ul { grid-template-columns:1fr; }
+      .quote { inline-size:250px; }
+    }
+    @media (max-width:620px) {
+      .lab-bar { padding:var(--space-2) var(--space-3); gap:var(--space-2); }
+      .lab-brand .toolbar-label,.toolbar-label.optional { display:none; }
+      .lab-tools { gap:var(--space-2); }
+      .viewport-control { gap:var(--space-2); }
+      .viewport-control input { inline-size:70px; }
+      .lab-tools .btn { padding-inline:var(--space-3); }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+      .hero-art,.orb,.art-label,.bento-card,.mini-command { transform:none !important; }
+      .marquee-track { inline-size:auto; flex-wrap:wrap; justify-content:center; }
+      .quote[data-duplicate] { display:none; }
+      .marquee-mask { mask-image:none; -webkit-mask-image:none; }
+    }
+    [data-reduced] *,[data-reduced] *::before,[data-reduced] *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+    [data-reduced] .hero-art,[data-reduced] .orb,[data-reduced] .art-label,[data-reduced] .bento-card { transform:none !important; }
+    [data-reduced] .marquee-track { inline-size:auto; flex-wrap:wrap; justify-content:center; }
+    [data-reduced] .quote[data-duplicate] { display:none; }
+    [data-reduced] .marquee-mask { mask-image:none; -webkit-mask-image:none; }
+    /* Container-query fallback keeps older engines usable. */
+    @supports not (container-type:inline-size) {
+      @media (max-width:700px) { .intro,.two-col,.form-layout,.pricing-grid,.bento { grid-template-columns:1fr; } .nav-links { display:none; } .intro h1 { font-size:clamp(3rem,14vw,5rem); } }
+      @media (max-width:450px) { .mega-triggers { display:none; } .drawer-trigger { display:grid; } }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#collection">Skip to collection</a>
+  <header class="lab-bar" id="lab-controls" aria-label="Showcase controls">
+    <div class="lab-brand"><a href="/" aria-label="Back to Motion Lib">↖</a><strong>Claude</strong><span class="toolbar-label muted">A MOTION LIB COLLECTION</span></div>
+    <div class="lab-tools">
+      <label class="viewport-control"><span class="toolbar-label optional">VIEWPORT</span><input id="width-control" type="range" min="320" max="3840" step="1" value="1440" aria-label="Preview viewport width"><output id="width-output" for="width-control">1440px</output></label>
+      <button class="btn" id="fit-control" type="button">Fit</button>
+      <button class="icon-btn" id="theme-control" type="button" aria-label="Switch to dark theme" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z"/></svg></button>
+      <button class="btn" id="direction-control" type="button" aria-pressed="false" aria-label="Preview right-to-left layout">RTL</button>
+      <button class="btn" id="checks-control" type="button">Run checks <span aria-hidden="true">↗</span></button>
+    </div>
+  </header>
+  <div class="preview-wrap" id="preview-wrap">
+  <div id="showcase">
+    <div class="page">
+      <header class="site-nav">
+        <a href="#top" class="wordmark" aria-label="Claude home"><span class="brand-symbol" aria-hidden="true">✳</span>claude<span class="muted" style="font-weight:400">/</span></a>
+        <nav class="nav-links" aria-label="Main"><a href="#collection">The collection</a><a href="#principles">Our approach</a><a href="#documentation">Under the hood ↗</a></nav>
+        <button class="nav-command" data-open-command type="button"><span>Find something</span><kbd>⌘ K</kbd></button>
+      </header>
+      <main id="top">
+        <c-hero intensity="1" id="hero">
+          <div data-content>
+            <div class="intro">
+              <div class="intro-copy">
+                <div class="row wrap"><span class="eyebrow muted">THE ART OF INTERACTION</span><span class="pill"><span class="dot"></span>Vol. 01 — Claude</span></div>
+                <h1 aria-label="Small details. Extraordinary feeling."><span data-split>Small details.</span><br><em class="serif" data-split>Extraordinary</em><br><span data-split>feeling.</span></h1>
+                <p class="copy">Ten considered interactions. Built to feel natural, move with intention, and make the everyday a little extraordinary.</p>
+                <div class="row wrap"><a class="btn btn-primary" href="#collection">Explore the collection <span aria-hidden="true">↘</span></a><span class="muted" style="font-size:var(--text-xs)">Made to be felt.</span></div>
+              </div>
+              <div class="hero-art" aria-hidden="true">
+                <div class="art-halo" data-depth=".35"></div><div class="orbit" data-depth=".7"></div><div class="orbit orbit-two" data-depth=".5"></div>
+                <div class="orb" data-depth="1"><div class="orb-grid">
+                  <i class="orb-ring" style="--ring:0"></i><i class="orb-ring" style="--ring:1"></i><i class="orb-ring" style="--ring:2"></i><i class="orb-ring" style="--ring:3"></i><i class="orb-ring" style="--ring:4"></i><i class="orb-ring" style="--ring:5"></i><i class="orb-ring" style="--ring:6"></i><i class="orb-ring" style="--ring:7"></i><i class="orb-ring" style="--ring:8"></i>
+                  <i class="orb-longitude" style="--ring:1"></i><i class="orb-longitude" style="--ring:3"></i><i class="orb-longitude" style="--ring:5"></i><i class="orb-longitude" style="--ring:7"></i><i class="orb-longitude" style="--ring:9"></i><i class="orb-longitude" style="--ring:11"></i>
+                </div></div>
+                <span class="art-cross" data-depth="1.4">+</span><div class="art-label" data-depth="1.5">a little more human.<br><span class="muted">35.68° / 139.69°</span></div><div class="art-label art-label-two" data-depth="1.2"><span class="dot"></span> responsive by nature</div><span class="art-coordinate">FIG. 02 — LAYERED DEPTH</span>
+              </div>
+            </div>
+            <div class="hero-foot"><div class="hero-meta"><span>10 INTERACTIONS</span><span class="muted">ZERO DEPENDENCIES</span><span class="muted">ENDLESS POSSIBILITIES</span></div><span>SCROLL TO DISCOVER ↓</span></div>
+          </div>
+        </c-hero>
+        <section class="section" id="collection" aria-labelledby="collection-title">
+          <div class="section-heading"><div><p class="eyebrow">01 / THE COLLECTION</p><h2 id="collection-title">Quietly remarkable.</h2></div><p>Real components. Real interactions.<br>Go ahead — click, drag, hover, explore.</p></div>
+          <div class="two-col">
+            <div><div class="spec-label"><span class="spec-number">01</span><span>MAGNETIC COMMAND</span><span class="spec-note">⌘ / CTRL + K</span></div>
+              <c-command aria-label="Magnetic command palette" magnet="9">
+                <div data-content class="panel"><div class="command-visual"><div class="mini-command" data-magnet><div class="mini-search"><span aria-hidden="true">⌕</span> A thought away… <kbd style="margin-inline-start:auto">⌘ K</kbd></div><button type="button" data-launch><span>↗ &nbsp; Explore the collection</span><span class="muted">↵</span></button><button type="button" data-launch><span>◐ &nbsp; Change the atmosphere</span><span class="muted">T</span></button><button type="button" data-launch><span>⊞ &nbsp; Find your next interaction</span><span class="muted">F</span></button></div></div><p class="command-caption">Your next move, a few keystrokes away.</p></div>
+                <dialog class="palette" aria-label="Command palette"><div class="palette-search"><span aria-hidden="true">⌕</span><input type="search" role="combobox" aria-label="Search commands" aria-autocomplete="list" aria-controls="command-list" aria-expanded="true" autocomplete="off" placeholder="What would you like to do?"><button class="icon-btn" type="button" data-close aria-label="Close command palette">×</button></div><div id="command-list" class="palette-results" role="listbox" aria-label="Commands"></div><div class="palette-footer"><span>↑ ↓ navigate</span><span>↵ select</span><span>esc close</span><span style="margin-inline-start:auto">A LITTLE MORE FLOW.</span></div><span class="sr-only" role="status" data-command-status></span></dialog>
+              </c-command>
+            </div>
+            <div><div class="spec-label"><span class="spec-number">06</span><span>LIVING DATA</span><span class="spec-note">HOVER TO SCRUB</span></div>
+              <c-data interval="6500" aria-label="Live demo revenue chart">
+                <div data-content class="panel"><div class="row between wrap"><span class="eyebrow muted">REVENUE / DEMO DATA</span><span class="pill"><span class="dot"></span><span data-feed-label>Live</span></span></div><div class="kpi"><strong data-kpi aria-label="Revenue: 24,680 dollars">$24,680</strong><span class="trend" data-trend>↗ 18.6%</span></div><span class="muted" style="font-size:var(--text-xs)" data-chart-caption>Steady progress. A little, every day.</span><div class="chart" tabindex="0" role="slider" aria-label="Scrub daily revenue" aria-valuemin="1" aria-valuemax="24" aria-valuenow="24" aria-valuetext="Day 24: 24,680 dollars"><div class="chart-reveal"><svg viewBox="0 0 480 150" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".16"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 35H480M0 80H480M0 125H480"/><path class="chart-area" d="M0 130L21 121L42 124L63 112L84 116L105 104L126 107L147 90L168 96L189 77L210 82L231 71L252 76L273 56L294 63L315 50L336 55L357 36L378 44L399 29L420 35L441 17L462 24L480 10V150H0Z"/><path class="chart-path" d="M0 130L21 121L42 124L63 112L84 116L105 104L126 107L147 90L168 96L189 77L210 82L231 71L252 76L273 56L294 63L315 50L336 55L357 36L378 44L399 29L420 35L441 17L462 24L480 10"/></svg></div><span class="chart-cursor"></span></div><div class="chart-labels"><span>OCT 01</span><span data-day>OCT 24</span></div><div class="data-footer"><span class="muted" style="font-size:var(--text-xs)">Illustrative data, real interaction.</span><button type="button" class="btn" data-live aria-pressed="true">Pause updates</button></div></div>
+              </c-data>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="principles" aria-labelledby="principles-title">
+          <div class="section-heading"><div><p class="eyebrow">03 / THE FEELING IS IN THE DETAILS</p><h2 id="principles-title">Made with intention.</h2></div><p>A little physics. A lot of care.<br>Move your pointer across the cards.</p></div>
+          <c-bento tilt="5" aria-label="Interactive feature grid"><div class="bento" data-content>
+            <article class="bento-card bento-feature" tabindex="0"><span class="spotlight" aria-hidden="true"></span><div class="row between"><span class="pill">FEELS RIGHT</span><span aria-hidden="true">↗</span></div><div class="spring-lines" aria-hidden="true"><span style="--bar:0"></span><span style="--bar:2"></span><span style="--bar:4"></span><span style="--bar:6"></span><span style="--bar:4"></span><span style="--bar:2"></span><span style="--bar:0"></span></div><div><h3>Motion with a pulse.</h3><p>Spring physics that feel familiar. Nothing forced. Everything connected.</p></div></article>
+            <article class="bento-card" tabindex="0"><span class="spotlight" aria-hidden="true"></span><div class="row between"><span class="eyebrow muted">BY NATURE</span><span aria-hidden="true">↗</span></div><div class="bento-glyph" aria-hidden="true">✳</div><div><h3>Every screen. Everyone.</h3><p>From your smallest screen to your biggest idea. Beautiful at every size.</p></div></article>
+            <article class="bento-card" tabindex="0"><span class="spotlight" aria-hidden="true"></span><div class="row between"><span class="eyebrow muted">OPEN TO ALL</span><span aria-hidden="true">↗</span></div><div class="focus-art" aria-hidden="true"><span>⇥</span><span>↵</span><span>⌘</span></div><div><h3>Care you can feel.</h3><p>Keyboard friendly. Thoughtful focus. Less motion when you want it.</p></div></article>
+          </div></c-bento>
+        </section>
+        <section class="section" id="pricing" aria-labelledby="pricing-title">
+          <div class="section-heading"><div><p class="eyebrow">04 / A PLAN FOR EVERY POSSIBILITY</p><h2 id="pricing-title">Room to grow.</h2></div><p>Switch the rhythm. Watch the numbers.<br>Sample plans for an imaginary studio.</p></div>
+          <c-pricing currency="USD" aria-label="Demo pricing plans"><div data-content><div class="row between wrap"><div class="billing" role="group" aria-label="Billing frequency"><span class="billing-indicator" aria-hidden="true"></span><button type="button" data-billing="monthly" aria-pressed="true">Monthly</button><button type="button" data-billing="yearly" aria-pressed="false">Yearly <span style="color:var(--accent);font-size:var(--text-xs)">−20%</span></button></div><span class="eyebrow muted">GOOD WORK DESERVES GOOD TOOLS.</span></div><div class="pricing-grid">
+            <article class="price-card" data-monthly="0" data-yearly="0"><div class="price-top"><h3>Seed</h3><span class="muted" aria-hidden="true">↗</span></div><div class="price"><span aria-hidden="true">$</span><span class="digits" data-price>0</span><small>/ month</small></div><p class="muted" style="font-size:var(--text-sm)">A place to begin.</p><ul><li>3 personal projects</li><li>Core interactions</li><li>Community support</li></ul><button class="btn" type="button" data-plan="Seed">Start something</button></article>
+            <article class="price-card featured" data-monthly="29" data-yearly="23"><div class="price-top"><h3>Studio</h3><span class="pill">THE SWEET SPOT</span></div><div class="price"><span aria-hidden="true">$</span><span class="digits" data-price>29</span><small>/ month</small></div><p class="muted" style="font-size:var(--text-sm)">For your next big thing.</p><ul><li>Unlimited projects</li><li>Every interaction</li><li>Priority support</li></ul><button class="btn btn-accent" type="button" data-plan="Studio">Make it happen ↗</button></article>
+            <article class="price-card" data-monthly="79" data-yearly="63"><div class="price-top"><h3>Collective</h3><span class="muted" aria-hidden="true">↗</span></div><div class="price"><span aria-hidden="true">$</span><span class="digits" data-price>79</span><small>/ month</small></div><p class="muted" style="font-size:var(--text-sm)">Better, together.</p><ul><li>Everything in Studio</li><li>10 team members</li><li>Shared workspaces</li></ul><button class="btn" type="button" data-plan="Collective">Build together</button></article>
+          </div><p class="billing-caption" data-billing-caption>Monthly billing. All prices in USD. Demo plans — no purchase is made.</p><span class="sr-only" role="status" data-price-status></span></div></c-pricing>
+        </section>
+        <section class="section" id="carousel" aria-labelledby="carousel-title">
+          <div class="section-heading"><div><p class="eyebrow">05 / FOLLOW YOUR CURIOSITY</p><h2 id="carousel-title">A change of perspective.</h2></div><p>Drag to explore. Let go to settle.<br>Or take the scenic route with autoplay.</p></div>
+          <c-carousel autoplay="false" interval="5000" role="region" aria-label="Sculptural studies carousel" aria-roledescription="carousel"><div data-content><div class="carousel-viewport" tabindex="0" role="group" aria-label="Slides. Use left and right arrow keys."><div class="carousel-track">
+            <article class="scene" role="group" aria-roledescription="slide" aria-label="1 of 4: Organic"><div class="scene-copy"><span class="eyebrow">STUDY 001 / NATURE</span></div><div class="scene-art scene-sphere" aria-hidden="true"></div><div class="scene-copy"><h3>Perfectly imperfect.</h3><p>SOFT EDGES. STRONG FEELINGS.</p></div></article>
+            <article class="scene" role="group" aria-roledescription="slide" aria-label="2 of 4: Structure"><div class="scene-copy"><span class="eyebrow">STUDY 002 / STRUCTURE</span></div><div class="scene-art scene-arch" aria-hidden="true"></div><div class="scene-copy"><h3>Room for wonder.</h3><p>A NEW WAY TO SEE THE ORDINARY.</p></div></article>
+            <article class="scene" role="group" aria-roledescription="slide" aria-label="3 of 4: Balance"><div class="scene-copy"><span class="eyebrow">STUDY 003 / BALANCE</span></div><div class="scene-art scene-fold" aria-hidden="true"></div><div class="scene-copy"><h3>A different angle.</h3><p>FAMILIAR. THEN UNEXPECTED.</p></div></article>
+            <article class="scene" role="group" aria-roledescription="slide" aria-label="4 of 4: Connection"><div class="scene-copy"><span class="eyebrow">STUDY 004 / CONNECTION</span></div><div class="scene-art scene-ring" aria-hidden="true"></div><div class="scene-copy"><h3>Everything connects.</h3><p>THE WHOLE IS MORE THAN THE PARTS.</p></div></article>
+          </div></div><div class="carousel-controls"><div class="row"><button class="icon-btn" type="button" data-prev aria-label="Previous slide">←</button><button class="icon-btn" type="button" data-next aria-label="Next slide">→</button><span class="eyebrow muted" data-slide-counter>01 / 04</span></div><div class="carousel-dots" role="group" aria-label="Choose slide"><button type="button" data-slide="0" aria-label="Slide 1" aria-current="true"></button><button type="button" data-slide="1" aria-label="Slide 2"></button><button type="button" data-slide="2" aria-label="Slide 3"></button><button type="button" data-slide="3" aria-label="Slide 4"></button></div><button type="button" class="btn" data-autoplay aria-pressed="false">Play <span aria-hidden="true">▷</span></button></div><span class="sr-only" role="status" data-carousel-status></span></div></c-carousel>
+        </section>
+        <section class="section" id="form" aria-labelledby="form-title">
+          <div class="spec-label"><span class="spec-number">07</span><span>A CONSIDERED CONVERSATION</span><span class="spec-note">THREE STEPS. ONE GOOD START.</span></div>
+          <c-form aria-label="Demo studio enquiry"><div class="panel form-layout" data-content><div><span class="eyebrow muted">LET'S MAKE SOMETHING</span><h3 id="form-title">Good things<br>start with<br><em>a hello.</em></h3><p class="copy">A little about you. A little about your idea. A first step toward something worth making.</p><p class="muted" style="font-size:var(--text-xs);margin-block-start:var(--space-5)">This is a demo. Your details stay in this page.</p></div>
+            <form novalidate><div class="form-progress" role="progressbar" aria-label="Step 1 of 3" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1"><span class="active"></span><span></span><span></span></div>
+              <fieldset class="form-step" data-step="0"><legend>01 — A little about you</legend><div class="field"><label for="enquiry-name">Your name</label><input id="enquiry-name" name="name" autocomplete="name" required minlength="2" maxlength="120" placeholder="How should we call you?" aria-describedby="name-error"><span class="field-error" id="name-error"></span></div><div class="field"><label for="enquiry-email">Email address</label><input id="enquiry-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@yourstudio.com" aria-describedby="email-error"><span class="field-error" id="email-error"></span></div></fieldset>
+              <fieldset class="form-step" data-step="1"><legend>02 — What are you imagining?</legend><div class="field"><label for="enquiry-project">Project name</label><input id="enquiry-project" name="project" required minlength="3" maxlength="180" placeholder="Every good idea needs a name" aria-describedby="project-error"><span class="field-error" id="project-error"></span></div><div class="field"><label for="enquiry-kind">Where do we begin?</label><select id="enquiry-kind" name="kind"><option>Brand &amp; digital experience</option><option>Product &amp; interaction design</option><option>Something wonderfully different</option></select></div></fieldset>
+              <fieldset class="form-step" data-step="2"><legend>03 — A final look</legend><dl class="review" data-review></dl><label class="consent"><input type="checkbox" name="consent" required aria-describedby="consent-error"><span>I understand this is a local demonstration and nothing is sent.</span></label><span class="field-error" id="consent-error"></span></fieldset>
+              <div class="form-actions"><button class="btn" type="button" data-back>Back</button><span class="eyebrow muted" data-step-label>01 / 03</span><button class="btn btn-primary" type="submit" data-continue disabled>Continue ↗</button></div><span class="sr-only" role="status" data-form-status></span>
+            </form><div class="success-view" hidden tabindex="-1"><div class="success-mark" aria-hidden="true">✓</div><h4>A lovely beginning.</h4><p>Your demo enquiry is complete.<br>No data left your browser.</p><button class="btn" type="button" data-reset>Begin again ↗</button></div>
+          </div></c-form>
+        </section>
+        <section class="section" id="navigation" aria-labelledby="navigation-title">
+          <div class="section-heading"><div><p class="eyebrow">08 + 10 / LITTLE MOMENTS OF CLARITY</p><h2 id="navigation-title">A sense of direction.</h2></div><p>Finding your way. Knowing what happened.<br>Small assurances make a big difference.</p></div>
+          <div class="two-col"><div><div class="spec-label"><span class="spec-number">08</span><span>SHAPE-SHIFTING NAVIGATION</span></div><c-nav aria-label="Morphing demo navigation"><div class="panel mega-demo" data-content><div class="mega-bar"><span class="mega-brand">atelier.</span><div class="mega-triggers"><button type="button" data-menu="explore" aria-expanded="false" aria-controls="mega-panel">Explore ↘</button><button type="button" data-menu="studio" aria-expanded="false" aria-controls="mega-panel">Studio ↘</button><button type="button" data-menu="learn" aria-expanded="false" aria-controls="mega-panel">Learn ↘</button></div><button type="button" class="icon-btn drawer-trigger" data-drawer aria-label="Open navigation drawer">☰</button></div><p class="mega-placeholder">A place for everything.<br><em>And a beautiful way there.</em></p><nav class="mega-panel" id="mega-panel" aria-label="Explore" hidden><div class="mega-content"></div></nav></div><dialog class="mobile-drawer" aria-label="Navigation drawer"><div class="row between"><span class="mega-brand">atelier.</span><button type="button" class="icon-btn" data-close-drawer aria-label="Close navigation drawer">×</button></div><nav aria-label="Mobile navigation"><a href="#collection">The collection ↗</a><a href="#principles">Our approach ↗</a><a href="#pricing">Plans &amp; possibilities ↗</a><a href="#form">Start a conversation ↗</a><a href="#documentation">Under the hood ↗</a></nav></dialog></c-nav></div>
+            <div><div class="spec-label"><span class="spec-number">10</span><span>THOUGHTFUL NOTIFICATIONS</span></div><c-toasts max="3" duration="5500" aria-label="Toast demonstration"><div class="panel" data-content><div class="row between"><span class="eyebrow muted">THE LITTLE REASSURANCES</span><span aria-hidden="true">↗</span></div><div class="toast-preview"><span class="toast-glyph" aria-hidden="true">✓</span><div><strong>Everything in its right place.</strong><p>A gentle nudge, then back to your flow.</p></div></div><p class="muted" style="font-size:var(--text-sm);margin-block-end:var(--space-5)">Stack them up. Swipe them away. Give each moment just enough room.</p><div class="toast-actions"><button class="btn" type="button" data-toast="success">A good moment ↗</button><button class="btn" type="button" data-toast="error">A small hiccup</button><button class="btn" type="button" data-burst>Send a little flurry</button></div><p class="queue-count" data-queue>0 visible · 0 queued</p></div><div class="toast-stack" aria-label="Notifications"></div><span class="sr-only" role="status" aria-live="polite" data-toast-status></span><span class="sr-only" role="alert" data-toast-error></span></c-toasts></div>
+          </div>
+        </section>
+        <section class="section" id="testimonials" aria-labelledby="testimonials-title">
+          <div class="section-heading"><div><p class="eyebrow">09 / IN GOOD COMPANY</p><h2 id="testimonials-title">Good things travel.</h2></div><p>A few illustrative voices from our imaginary studio.<br>Pause to stay a little longer.</p></div>
+          <c-marquee aria-label="Illustrative testimonials"><div data-content><div class="marquee-mask"><div class="marquee-track">
+            <figure class="quote"><span class="eyebrow muted">ON THE DETAILS</span><blockquote>“The kind of detail you don't notice. Until you use something without it.”</blockquote><figcaption class="row"><span class="avatar" aria-hidden="true">AL</span><div><cite>Alex Lane</cite><p class="muted" style="font-size:var(--text-xs)">Illustrative voice · Designer</p></div></figcaption></figure>
+            <figure class="quote"><span class="eyebrow muted">ON THE FEELING</span><blockquote>“It moves the way you expect, then gives you something you didn't.”</blockquote><figcaption class="row"><span class="avatar" aria-hidden="true">MR</span><div><cite>Morgan Reed</cite><p class="muted" style="font-size:var(--text-xs)">Illustrative voice · Engineer</p></div></figcaption></figure>
+            <figure class="quote"><span class="eyebrow muted">ON THE CRAFT</span><blockquote>“Thoughtful enough to get out of the way. Beautiful enough to make you stay.”</blockquote><figcaption class="row"><span class="avatar" aria-hidden="true">JK</span><div><cite>Jamie Kim</cite><p class="muted" style="font-size:var(--text-xs)">Illustrative voice · Art director</p></div></figcaption></figure>
+          </div></div><div class="row between wrap" style="margin-block-start:var(--space-5)"><span class="eyebrow muted">HOVER TO LINGER. TAB TO PAUSE.</span><button type="button" class="btn" data-marquee-pause aria-pressed="false">Pause the flow</button></div></div></c-marquee>
+        </section>
+        <section class="harness" id="checks" aria-labelledby="checks-title"><div class="harness-head"><div><h2 id="checks-title">A little peace of mind.</h2><p class="muted" style="font-size:var(--text-xs)">Real checks in an isolated 320px viewport.</p></div><button class="btn" type="button" id="run-tests">Run checks ↗</button></div><ol class="harness-results" id="test-results" aria-live="polite"><li class="muted">Ready when you are. Checks run locally.</li></ol></section>
+        <details class="docs" id="documentation"><summary>Under the hood — rationale, reusable API &amp; requirement map ↗</summary>
+          <p><strong>Design rationale.</strong> Claude treats motion as a material: warm paper, expressive serif, quiet clay accents and a green sculptural world keep the collection human. A common spring solver makes magnetic attraction, spatial depth and gesture settling feel related. Each interaction earns its movement through purpose, while reduced motion retains the same composition and clarity.</p>
+          <p><strong>Reuse.</strong> Copy this entire file, or copy its shared CSS, shared runtime and the desired custom element. Light DOM keeps content semantic and available before JavaScript. Override tokens on any host. All components accept <code>state="ready|loading|empty|error"</code>, expose <code>destroy()</code>, and dispatch bubbling <code>claude:state</code> events. Removing a host aborts listeners, cancels timers and springs, disconnects observers, releases pointer capture and removes its overlays. Reconnecting reinstates its behavior.</p>
+          <table><caption class="sr-only">Component attributes, methods and events</caption><thead><tr><th>Component</th><th>API</th><th>Behavior</th></tr></thead><tbody>
+            <tr><td>01 c-command</td><td><code>magnet; open(); close(); items; claude:command</code></td><td>Subsequence fuzzy scoring, categories, combobox, keyboard selection, modal trap, spring attraction.</td></tr>
+            <tr><td>02 c-hero</td><td><code>intensity; claude:depth</code></td><td>Split reveal, layered pointer depth, native scroll timeline with scroll/rAF fallback.</td></tr>
+            <tr><td>03 c-bento</td><td><code>tilt; claude:tilt</code></td><td>Compositor spotlight, spring tilt, focus and press parity.</td></tr>
+            <tr><td>04 c-pricing</td><td><code>currency; billing; claude:billing; claude:plan</code></td><td>Animated segmented switch, rolling digits, explicit yearly totals, local demo action.</td></tr>
+            <tr><td>05 c-carousel</td><td><code>autoplay; interval; goTo(index); claude:slide</code></td><td>Pointer capture, velocity projection, spring snapping, arrows, dots, intentional autoplay, visibility pause.</td></tr>
+            <tr><td>06 c-data</td><td><code>interval; values; setData(values); claude:data</code></td><td>Transform curtain draw-in, pointer and keyboard scrubbing, live simulated data, offscreen pause.</td></tr>
+            <tr><td>07 c-form</td><td><code>step; reset(); claude:step; claude:complete</code></td><td>Inline validation, focus guidance, review, progress, local success choreography.</td></tr>
+            <tr><td>08 c-nav</td><td><code>menu; openMenu(key); claude:menu</code></td><td>Shared panel FLIP, disclosure semantics, Escape, outside click, modal mobile drawer.</td></tr>
+            <tr><td>09 c-marquee</td><td><code>paused; pause(); claude:pause</code></td><td>Seamless duplicated track, hover/focus/touch pause, masks, static reduced motion, invisible clones.</td></tr>
+            <tr><td>10 c-toasts</td><td><code>max; duration; push({kind,title,message}); claude:toast</code></td><td>Bounded queue, stacking, transform-only entry/exit, swipe, close button, persistent errors, live announcements.</td></tr>
+          </tbody></table>
+          <p><strong>Robustness.</strong> Fluid type and gutters, container queries, logical properties, RTL preview, minimum 44px controls, native dialog with focus-trap fallback, live regions, visible focus, runtime reduced-motion changes, static first paint, generic state panels, chart zero/invalid data handling and safe textContent rendering. Chrome/Safari/Firefox fallbacks exist for View Transitions, scroll timelines, container queries, dialogs, IntersectionObserver and ResizeObserver.</p>
+          <p><strong>Motion &amp; performance.</strong> Transform and opacity animations only; highlights translate static gradients instead of animating paint. A shared time-correct spring solver, transform curtain chart trace, independently rolling digits, a FLIP nav panel, native scroll depth and a View Transitions theme change provide six signature moments. Geometry reads happen before batched writes. Springs settle and release their animation frame; observers gate live work; will-change is limited to active gestures.</p>
+          <p><strong>Checks.</strong> The harness verifies 320px overflow and touch targets, source-order focus, command keyboard navigation and trap, runtime reduced motion, all ten empty states, zero and invalid chart data, RTL width, toast queue, disconnect cleanup and internal link containment. These checks do not replace assistive-technology testing or real-device browser testing.</p>
+          <p><strong>Self-review / 10.</strong> Visual composition 9 · Motion craft 9 · Responsiveness 9 · Accessibility 9 · Performance 9 · Reusability 9. These are design and implementation assessments, rather than independent audit scores.</p>
+        </details>
+      </main>
+      <footer class="footer"><a href="#top" class="wordmark"><span class="brand-symbol" aria-hidden="true">✳</span>claude/</a><span>MADE WITH CARE. BUILT TO MOVE.</span><div><a class="btn" href="./index.html" download="claude-index.html">Take the whole collection ↓</a></div></footer>
+    </div>
+    <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+  </div>
+  </div>
+  <noscript><p style="padding:1rem">The complete collection is visible. Enable JavaScript for interactive previews and viewport controls.</p></noscript>
+  <script id="claude-code">
+  (() => {
+    'use strict';
+    const root = document.documentElement;
+    // Preserve an export before enhancement, so the full HTML downloads offline.
+    const exportRoot=root.cloneNode(true);
+    exportRoot.querySelectorAll('script[src*="/@vite/"],script[src*="/@react-refresh"]').forEach(node => node.remove());
+    const standaloneSource='<!doctype html>\n'+exportRoot.outerHTML;
+    const $ = (selector, context = document) => context.querySelector(selector);
+    const $$ = (selector, context = document) => Array.from(context.querySelectorAll(selector));
+    const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+    const PHYSICS = Object.freeze({ stiffness:190, damping:25, mass:1, precision:.015, maxDelta:.032, substep:.008, velocityProjection:.2, swipeDistance:72, swipeVelocity:.45 });
+    const TIMING = Object.freeze({ stagger:70, entrance:760, quick:160, normal:360, chart:1100, announcement:35, testTimeout:9000 });
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const focusSelector = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    const focusable = element => $$(focusSelector, element).filter(node => !node.closest('[hidden],[inert]') && node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden');
+    const focus = node => { if (node) { try { node.focus({ preventScroll:true }); } catch (_) { node.focus(); } } };
+    const announce = message => { const node = $('#announcer'); if (node) node.textContent = message; };
+    const navigate = id => { const target = document.getElementById(id); if (target) { target.scrollIntoView({ behavior:Motion.reduced ? 'auto' : 'smooth', block:'start' }); const heading = $('h2,h3,h1', target) || target; heading.setAttribute('tabindex','-1'); focus(heading); } };
+
+    // A disposable ownership scope: all component resources have one lifetime.
+    const ownedScopes=new Set();
+    class Scope {
+      constructor() { this.cleanups = []; this.timers = new Set(); this.animations = new Set(); this.closed = false; ownedScopes.add(this); }
+      add(cleanup) { if (this.closed) cleanup(); else this.cleanups.push(cleanup); return cleanup; }
+      on(target, type, handler, options) { target.addEventListener(type,handler,options); this.add(() => target.removeEventListener(type,handler,options)); return handler; }
+      after(callback, delay) { if (this.closed) return null; const id = setTimeout(() => { this.timers.delete(id); if (!this.closed) callback(); },delay); this.timers.add(id); return id; }
+      clear(id) { clearTimeout(id); this.timers.delete(id); }
+      frame(callback) { if (this.closed) return 0; const id = requestAnimationFrame(() => { this.frames.delete(id); if (!this.closed) callback(); }); (this.frames ||= new Set()).add(id); return id; }
+      animate(node, frames, options = {}) {
+        if (Motion.reduced || !node.animate) { const last = frames[frames.length - 1]; for (const [key,value] of Object.entries(last)) if (key !== 'offset') node.style[key] = value; return Promise.resolve(); }
+        const animation = node.animate(frames,{ duration:TIMING.normal,easing:'cubic-bezier(.22,1,.36,1)',...options });
+        this.animations.add(animation);
+        return animation.finished.catch(() => {}).then(() => { this.animations.delete(animation); });
+      }
+      close() { if (this.closed) return; this.closed = true; this.timers.forEach(clearTimeout); this.timers.clear(); this.frames?.forEach(cancelAnimationFrame); this.frames?.clear(); this.animations.forEach(animation => animation.cancel()); this.animations.clear(); this.cleanups.reverse().forEach(cleanup => cleanup()); this.cleanups.length = 0; ownedScopes.delete(this); }
+    }
+
+    // Semi-implicit Euler, bounded delta, small substeps; one scheduler for all springs.
+    const Motion = {
+      active:new Set(), frame:0, last:0,
+      get reduced() { return motionQuery.matches || root.hasAttribute('data-reduced'); },
+      wake(spring) { this.active.add(spring); if (!this.frame) { this.last = performance.now(); this.frame = requestAnimationFrame(time => this.tick(time)); } },
+      tick(time) {
+        this.frame = 0; const delta = clamp((time - this.last) / 1000, .001, PHYSICS.maxDelta); this.last = time;
+        this.active.forEach(spring => { if (this.reduced) spring.snap(); else if (!spring.step(delta)) this.active.delete(spring); });
+        if (this.active.size) this.frame = requestAnimationFrame(next => this.tick(next));
+      },
+      sync() { if (this.reduced) { Array.from(this.active).forEach(spring => spring.snap()); ownedScopes.forEach(scope => scope.animations.forEach(animation => animation.cancel())); cancelAnimationFrame(this.frame); this.frame = 0; } document.dispatchEvent(new CustomEvent('claude:motionchange',{ detail:{ reduced:this.reduced } })); },
+      destroy() { cancelAnimationFrame(this.frame); this.frame=0; Array.from(this.active).forEach(spring => spring.destroy()); }
+    };
+    class Spring {
+      constructor(scope, initial, write, settle) { this.value = {...initial}; this.target = {...initial}; this.velocity = Object.fromEntries(Object.keys(initial).map(key => [key,0])); this.write=write; this.settle=settle; this.dead=false; scope.add(() => this.destroy()); }
+      to(target) { if (this.dead) return; Object.assign(this.target,target); if (Motion.reduced) this.snap(); else Motion.wake(this); }
+      step(delta) {
+        let moving=false; let remaining=delta;
+        while (remaining > 0) {
+          const dt=Math.min(remaining,PHYSICS.substep); remaining-=dt;
+          for (const key of Object.keys(this.value)) {
+            const acceleration=(PHYSICS.stiffness*(this.target[key]-this.value[key])-PHYSICS.damping*this.velocity[key])/PHYSICS.mass;
+            this.velocity[key]+=acceleration*dt; this.value[key]+=this.velocity[key]*dt;
+          }
+        }
+        for (const key of Object.keys(this.value)) if (Math.abs(this.target[key]-this.value[key])>PHYSICS.precision || Math.abs(this.velocity[key])>PHYSICS.precision) moving=true;
+        if (!moving) { this.snap(); return false; } this.write(this.value); return true;
+      }
+      snap() { if (this.dead) return; Object.assign(this.value,this.target); Object.keys(this.velocity).forEach(key => this.velocity[key]=0); this.write(this.value); Motion.active.delete(this); this.settle?.(); }
+      destroy() { this.dead=true; Motion.active.delete(this); }
+    }
+    const pageScope = new Scope();
+    if (motionQuery.addEventListener) pageScope.on(motionQuery,'change',() => Motion.sync());
+    else { const changed=() => Motion.sync(); motionQuery.addListener(changed); pageScope.add(() => motionQuery.removeListener(changed)); }
+    pageScope.on(document,'visibilitychange',() => { if (document.hidden) Array.from(Motion.active).forEach(spring => spring.snap()); });
+
+    let nextId=0;
+    class Component extends HTMLElement {
+      static get observedAttributes() { return ['state']; }
+      connectedCallback() {
+        if (this.scope && !this.scope.closed) return;
+        this.scope=new Scope(); this.uid ||= `claude-${++nextId}`; this.visible=!('IntersectionObserver' in window);
+        this.content=$('[data-content]',this);
+        this.statePanel=$('[data-state-panel]',this);
+        if (!this.statePanel) {
+          this.statePanel=document.createElement('div'); this.statePanel.className='state-panel'; this.statePanel.dataset.statePanel=''; this.statePanel.hidden=true; this.statePanel.setAttribute('role','status');
+          const glyph=document.createElement('span'); glyph.className='state-glyph'; glyph.setAttribute('aria-hidden','true'); glyph.textContent='✳';
+          const message=document.createElement('p'); message.dataset.stateMessage='';
+          const retry=document.createElement('button'); retry.type='button'; retry.className='btn'; retry.dataset.retry=''; retry.textContent='Try again ↗';
+          this.statePanel.append(glyph,message,retry); this.append(this.statePanel);
+        }
+        this.scope.on($('[data-retry]',this.statePanel),'click',() => { this.recover?.(); this.setAttribute('state','ready'); });
+        if ('IntersectionObserver' in window) { const observer=new IntersectionObserver(entries => { this.visible=entries[0].isIntersecting; this.visibilityChanged?.(); },{ rootMargin:'100px' }); observer.observe(this); this.scope.add(() => observer.disconnect()); }
+        this.scope.on(document,'visibilitychange',() => this.visibilityChanged?.());
+        this.setup(); this.renderState();
+      }
+      attributeChangedCallback(name, oldValue, value) { if (oldValue!==value && this.scope && !this.scope.closed) { if (name==='state') this.renderState(); else this.attributeChanged?.(name,value); } }
+      get ready() { return !this.getAttribute('state') || this.getAttribute('state')==='ready'; }
+      get active() { return this.ready && this.visible && !document.hidden && !this.scope?.closed; }
+      renderState() {
+        const state=this.getAttribute('state') || 'ready'; const messages={ loading:'Taking a moment to get everything in place…',empty:'A little room for something new. No content to show yet.',error:'A small interruption. Let’s give that another try.' };
+        const isReady=state==='ready' || !messages[state]; if (this.content) this.content.hidden=!isReady;
+        if (!isReady) { this.modal?.close(); this.drawerModal?.close(); this.closeMenu?.(); }
+        this.statePanel.hidden=isReady; $('[data-state-message]',this.statePanel).textContent=messages[state] || '';
+        $('[data-retry]',this.statePanel).hidden=state!=='error'; this.setAttribute('aria-busy',String(state==='loading'));
+        this.visibilityChanged?.(); this.emit('state',{ state });
+      }
+      emit(name,detail) { this.dispatchEvent(new CustomEvent(`claude:${name}`,{ detail,bubbles:true,composed:true })); }
+      resize(node,callback) { if ('ResizeObserver' in window) { const observer=new ResizeObserver(callback); observer.observe(node); this.scope.add(() => observer.disconnect()); } else { this.scope.on(window,'resize',callback,{ passive:true }); callback(); } }
+      destroy() { this.scope?.close(); this.dispose?.(); }
+      disconnectedCallback() { this.destroy(); }
+    }
+
+    // Native dialog first; a focus/inert/backdrop fallback for older engines.
+    function modal(owner,dialog) {
+      let previous=null, fallbackBackdrop=null, inert=[];
+      dialog.setAttribute('aria-modal','true');
+      const close=() => {
+        if (!dialog.open && !dialog.hasAttribute('open')) return;
+        if (typeof dialog.close==='function') dialog.close(); else dialog.removeAttribute('open');
+        fallbackBackdrop?.remove(); fallbackBackdrop=null;
+        inert.forEach(([node,wasInert]) => { node.inert=wasInert; if (!wasInert) node.removeAttribute('inert'); }); inert=[];
+        if (previous?.isConnected) focus(previous);
+      };
+      const open=() => {
+        if (dialog.open || dialog.hasAttribute('open')) return;
+        previous=document.activeElement;
+        if (typeof dialog.showModal==='function') dialog.showModal();
+        else {
+          dialog.setAttribute('open',''); dialog.setAttribute('role','dialog'); dialog.style.position='fixed'; dialog.style.inset='1rem'; dialog.style.zIndex='95';
+          fallbackBackdrop=document.createElement('div'); fallbackBackdrop.style.cssText='position:fixed;inset:0;background:#0d191166;z-index:94'; document.body.append(fallbackBackdrop); owner.scope.on(fallbackBackdrop,'click',close);
+          let branch=dialog;
+          while (branch.parentElement) { const parent=branch.parentElement; Array.from(parent.children).filter(node => node!==branch && node!==fallbackBackdrop && !['SCRIPT','STYLE'].includes(node.tagName)).forEach(node => { inert.push([node,!!node.inert]); node.inert=true; node.setAttribute('inert',''); }); if (parent===document.body) break; branch=parent; }
+        }
+        focus(focusable(dialog)[0] || dialog);
+        owner.scope.animate(dialog,[{ opacity:0,transform:'translateY(12px) scale(.98)' },{ opacity:1,transform:'none' }]);
+      };
+      owner.scope.on(dialog,'cancel',event => { event.preventDefault(); close(); });
+      owner.scope.on(dialog,'keydown',event => {
+        if (event.key==='Escape') { event.preventDefault(); close(); return; }
+        if (event.key!=='Tab') return;
+        const nodes=focusable(dialog); const first=nodes[0],last=nodes[nodes.length-1];
+        if (!first) { event.preventDefault(); focus(dialog); }
+        else if (event.shiftKey && (document.activeElement===first || !dialog.contains(document.activeElement))) { event.preventDefault(); focus(last); }
+        else if (!event.shiftKey && (document.activeElement===last || !dialog.contains(document.activeElement))) { event.preventDefault(); focus(first); }
+      });
+      owner.scope.on(dialog,'click',event => { if (event.target===dialog) { const rect=dialog.getBoundingClientRect(); if (event.clientX<rect.left || event.clientX>rect.right || event.clientY<rect.top || event.clientY>rect.bottom) close(); } });
+      owner.scope.on(document,'focusin',event => { if (dialog.hasAttribute('open') && !dialog.contains(event.target)) focus(focusable(dialog)[0]); });
+      owner.scope.add(close); return { open,close };
+    }
+
+    const DEFAULT_COMMANDS=[
+      { label:'Explore the collection',group:'Go somewhere',icon:'↗',target:'collection',keywords:'components gallery find' },
+      { label:'Layered scroll hero',group:'Go somewhere',icon:'◉',target:'hero',keywords:'parallax depth split text' },
+      { label:'Spotlight feature grid',group:'Go somewhere',icon:'⊞',target:'principles',keywords:'bento tilt cards' },
+      { label:'Plans & possibilities',group:'Go somewhere',icon:'◎',target:'pricing',keywords:'pricing monthly yearly' },
+      { label:'A change of perspective',group:'Go somewhere',icon:'↔',target:'carousel',keywords:'carousel drag swipe slides' },
+      { label:'Start a conversation',group:'Go somewhere',icon:'✎',target:'form',keywords:'form steps enquiry contact' },
+      { label:'Shape-shifting navigation',group:'Go somewhere',icon:'⌘',target:'navigation',keywords:'nav mega menu toast notifications' },
+      { label:'Good things travel',group:'Go somewhere',icon:'〰',target:'testimonials',keywords:'testimonials marquee quotes' },
+      { label:'Change the atmosphere',group:'Make it yours',icon:'◐',action:'theme',keywords:'dark light theme' },
+      { label:'Switch reading direction',group:'Make it yours',icon:'⇄',action:'direction',keywords:'rtl arabic right left' },
+      { label:'Run the built-in checks',group:'Behind the scenes',icon:'✓',action:'tests',keywords:'test harness accessibility' },
+      { label:'Under the hood',group:'Behind the scenes',icon:'↗',target:'documentation',keywords:'code api documentation reuse' }
+    ];
+    function fuzzy(query,text) {
+      if (!query) return 1; let position=0,score=0,last=-2;
+      for (const char of query.toLowerCase()) { const found=text.toLowerCase().indexOf(char,position); if (found<0) return -1; score+=found===last+1 ? 8 : 2; if (found===0 || text[found-1]===' ') score+=5; score-=found*.02; last=found; position=found+1; }
+      return score;
+    }
+    class Command extends Component {
+      setup() {
+        this.dialog=$('dialog',this); this.input=$('input',this.dialog); this.list=$('[role=listbox]',this.dialog); this.list.id=`${this.uid}-commands`; this.input.setAttribute('aria-controls',this.list.id);
+        this.modal=modal(this,this.dialog); this._items ||= DEFAULT_COMMANDS.map(item => ({...item})); this.selected=0;
+        $$('[data-launch]',this).forEach(button => this.scope.on(button,'click',() => this.open()));
+        this.scope.on($('[data-close]',this),'click',() => this.close());
+        this.scope.on(this.input,'input',() => { this.selected=0; this.search(); });
+        this.scope.on(this.input,'keydown',event => {
+          const length=this.results.length;
+          if (['ArrowDown','ArrowUp','Home','End'].includes(event.key)) { event.preventDefault(); if (!length) return; if (event.key==='Home') this.selected=0; else if (event.key==='End') this.selected=length-1; else this.selected=(this.selected+(event.key==='ArrowDown'?1:-1)+length)%length; this.select(); }
+          if (event.key==='Enter') { event.preventDefault(); this.execute(this.results[this.selected]); }
+        });
+        this.scope.on(this.list,'click',event => { const option=event.target.closest('[data-result]'); if (option) this.execute(this.results[Number(option.dataset.result)]); });
+        this.scope.on(this.list,'pointermove',event => { if (event.pointerType==='touch') return; const option=event.target.closest('[data-result]'); if (option && this.selected!==Number(option.dataset.result)) { this.selected=Number(option.dataset.result); this.select(false); } });
+        this.scope.on(document,'keydown',event => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase()==='k' && !event.isComposing) { event.preventDefault(); this.dialog.open ? this.close() : this.open(); } });
+        const magnetic=$('[data-magnet]',this); let rect;
+        const spring=new Spring(this.scope,{x:0,y:0},value => { magnetic.style.transform=Motion.reduced?'none':`translate3d(${value.x}px,${value.y}px,0) rotate(-2deg)`; });
+        this.scope.on(magnetic,'pointerenter',() => rect=magnetic.getBoundingClientRect());
+        this.scope.on(magnetic,'pointermove',event => { if (event.pointerType==='touch' || Motion.reduced) return; if (!rect) return; const amount=clamp(Number(this.getAttribute('magnet')) || 9,0,24); spring.to({x:((event.clientX-rect.left)/rect.width-.5)*amount*2,y:((event.clientY-rect.top)/rect.height-.5)*amount*2}); });
+        this.scope.on(magnetic,'pointerleave',() => spring.to({x:0,y:0})); this.scope.on(magnetic,'focusin',() => spring.to({x:0,y:-3})); this.scope.on(magnetic,'focusout',() => spring.to({x:0,y:0}));
+        this.search();
+      }
+      set items(value) { this._items=Array.isArray(value)?value.filter(item => item && typeof item.label==='string'):[]; if (this.list) this.search(); }
+      get items() { return this._items; }
+      open() { if (!this.ready) return; this.input.value=''; this.selected=0; this.search(); this.modal.open(); focus(this.input); }
+      close() { this.modal.close(); }
+      search() {
+        const query=this.input.value.trim(); const ranked=this._items.map(item => ({ item,score:fuzzy(query,`${item.label} ${item.keywords || ''}`) })).filter(item => item.score>=0).sort((a,b) => b.score-a.score);
+        const groups=new Map(); ranked.forEach(({item}) => { const group=item.group || 'Commands'; if (!groups.has(group)) groups.set(group,[]); groups.get(group).push(item); });
+        this.results=[]; const fragment=document.createDocumentFragment();
+        for (const [name,items] of groups) {
+          const group=document.createElement('div'); group.setAttribute('role','group'); group.setAttribute('aria-label',name);
+          const title=document.createElement('div'); title.className='palette-group'; title.setAttribute('aria-hidden','true'); title.textContent=name; group.append(title);
+          items.forEach(item => { const index=this.results.length; this.results.push(item); const option=document.createElement('div'); option.className='palette-option'; option.id=`${this.uid}-option-${index}`; option.setAttribute('role','option'); option.dataset.result=String(index); const glyph=document.createElement('span'); glyph.setAttribute('aria-hidden','true'); glyph.textContent=item.icon || '↗'; const label=document.createElement('span'); label.textContent=item.label; const hint=document.createElement('span'); hint.className='option-hint'; hint.textContent='↵'; hint.setAttribute('aria-hidden','true'); option.append(glyph,label,hint); group.append(option); }); fragment.append(group);
+        }
+        if (!this.results.length) { const empty=document.createElement('p'); empty.className='no-results'; empty.setAttribute('role','status'); empty.textContent=query?`No matches for “${query}”. Try a different thought.`:'No commands yet. A little room for something new.'; fragment.append(empty); }
+        this.list.replaceChildren(fragment); this.selected=clamp(this.selected,0,Math.max(0,this.results.length-1)); this.select(false);
+        $('[data-command-status]',this).textContent=`${this.results.length} ${this.results.length===1?'command':'commands'} available.`;
+      }
+      select(scroll=true) { $$('[role=option]',this.list).forEach((option,index) => option.setAttribute('aria-selected',String(index===this.selected))); const selected=$(`[data-result="${this.selected}"]`,this.list); if (selected) { this.input.setAttribute('aria-activedescendant',selected.id); if (scroll) selected.scrollIntoView({ block:'nearest',behavior:'auto' }); } else this.input.removeAttribute('aria-activedescendant'); }
+      execute(item) { if (!item) return; this.close(); if (item.target) { if (item.target==='documentation') $('#documentation').open=true; navigate(item.target); } else if (item.action==='theme') setTheme(root.dataset.theme==='dark'?'light':'dark'); else if (item.action==='direction') setDirection(root.dir==='rtl'?'ltr':'rtl'); else if (item.action==='tests') { navigate('checks'); runTests(); } else item.run?.(); this.emit('command',{ label:item.label,action:item.action,target:item.target }); }
+      dispose() { this.modal?.close(); }
+    }
+
+    class Hero extends Component {
+      setup() {
+        const words=[];
+        $$('[data-split]',this).forEach(line => { if (!line.dataset.built) { const tokens=line.textContent.split(' '); line.replaceChildren(); tokens.forEach((text,index) => { if (index) line.append(' '); const wrap=document.createElement('span'); wrap.className='word-wrap'; const word=document.createElement('span'); word.className='word'; word.textContent=text; wrap.append(word); line.append(wrap); }); line.dataset.built=''; } words.push(...$$('.word',line)); line.setAttribute('aria-hidden','true'); });
+        words.forEach((word,index) => this.scope.animate(word,[{ opacity:0,transform:'translateY(110%) rotate(3deg)' },{ opacity:1,transform:'translateY(0) rotate(0)' }],{ duration:TIMING.entrance,delay:index*TIMING.stagger }));
+        const layers=$$('[data-depth]',this).map(node => ({ node,depth:Number(node.dataset.depth),base:getComputedStyle(node).transform })); let rect;
+        const spring=new Spring(this.scope,{x:0,y:0},value => layers.forEach(({node,depth,base}) => { node.style.transform=Motion.reduced?'none':`translate3d(${value.x*depth}px,${value.y*depth}px,0) ${base==='none'?'':base}`; }));
+        this.scope.on(this,'pointerenter',() => rect=this.getBoundingClientRect());
+        this.scope.on(this,'pointermove',event => { if (event.pointerType==='touch' || !rect || Motion.reduced) return; const intensity=clamp(Number(this.getAttribute('intensity')) || 1,0,2); spring.to({ x:((event.clientX-rect.left)/rect.width-.5)*20*intensity,y:((event.clientY-rect.top)/rect.height-.5)*20*intensity }); });
+        this.scope.on(this,'pointerleave',() => { spring.to({x:0,y:0}); this.emit('depth',{x:0,y:0}); });
+        this.scope.on(document,'claude:motionchange',() => spring.to({x:0,y:0}));
+        const art=$('.hero-art',this); const nativeTimeline=window.CSS && CSS.supports('animation-timeline','view()');
+        if (!nativeTimeline) { let pending=false; const update=() => { if (pending || !this.active || Motion.reduced) return; pending=true; this.scope.frame(() => { pending=false; const bounds=this.getBoundingClientRect(); const progress=clamp(-bounds.top/Math.max(1,bounds.height),-.5,1); art.style.transform=`translateY(${-progress*48}px)`; }); }; this.scope.on(window,'scroll',update,{ passive:true }); this.scope.on(window,'resize',update,{ passive:true }); }
+      }
+    }
+
+    class Bento extends Component {
+      setup() {
+        $$('.bento-card',this).forEach(card => {
+          const light=$('.spotlight',card); let rect=null; let pressing=false;
+          $$('.spotlight-border',card).forEach(node => node.remove());
+          const border=document.createElement('span'); border.className='spotlight-border'; border.setAttribute('aria-hidden','true'); const edge=document.createElement('span'); edge.className='spotlight'; border.append(edge); card.append(border); this.scope.add(() => border.remove());
+          const spring=new Spring(this.scope,{x:0,y:0,rx:0,ry:0},value => { card.style.transform=Motion.reduced?'none':`perspective(900px) rotateX(${value.rx}deg) rotateY(${value.ry}deg)`; light.style.transform=`translate3d(${value.x}px,${value.y}px,0)`; edge.style.transform=light.style.transform; },() => card.style.removeProperty('will-change'));
+          const move=(x,y) => { if (!rect) return; const tilt=clamp(Number(this.getAttribute('tilt')) || 5,0,12); const px=clamp(x-rect.left,0,rect.width),py=clamp(y-rect.top,0,rect.height); spring.to({x:px,y:py,rx:-(py/rect.height-.5)*tilt,ry:(px/rect.width-.5)*tilt}); };
+          const reset=() => { pressing=false; spring.to({rx:0,ry:0}); light.style.opacity=''; this.emit('tilt',{active:false}); };
+          this.scope.on(card,'pointerenter',() => { rect=card.getBoundingClientRect(); if (!Motion.reduced) card.style.willChange='transform'; });
+          this.scope.on(card,'pointermove',event => { if (event.pointerType==='touch' && !pressing) return; if (rect) move(event.clientX,event.clientY); });
+          this.scope.on(card,'pointerdown',event => { pressing=true; rect=card.getBoundingClientRect(); light.style.opacity='.6'; move(event.clientX,event.clientY); });
+          this.scope.on(card,'pointerup',reset); this.scope.on(card,'pointercancel',reset); this.scope.on(card,'pointerleave',reset);
+          this.scope.on(card,'focus',() => { rect=card.getBoundingClientRect(); move(rect.left+rect.width*.5,rect.top+rect.height*.4); }); this.scope.on(card,'blur',reset);
+          this.scope.on(card,'keydown',event => { if (event.key==='Enter' || event.key===' ') { event.preventDefault(); rect=card.getBoundingClientRect(); move(rect.left+rect.width*.6,rect.top+rect.height*.35); this.emit('tilt',{active:true}); } });
+          this.scope.on(card,'keyup',event => { if (event.key==='Enter' || event.key===' ') reset(); });
+          this.scope.on(document,'claude:motionchange',reset);
+          const bars=$$('.spring-lines span',card); this.scope.on(card,'pointerenter',() => bars.forEach((bar,index) => this.scope.animate(bar,[{transform:'scaleY(1)'},{transform:'scaleY(.55)'},{transform:'scaleY(1)'}],{duration:TIMING.entrance,delay:index*TIMING.stagger/2})));
+        });
+      }
+    }
+
+    function rollNumber(scope,container,value,{currency=false,animate=true}={}) {
+      const formatted=new Intl.NumberFormat('en-US',{ maximumFractionDigits:0,notation:currency && value>=1000000?'compact':'standard' }).format(Math.max(0,Math.round(value)));
+      const text=(currency?'$':'')+formatted;
+      const previous=container.dataset.number || '';
+      const oldStrips=$$('.digit-strip',container).map(strip => ({ y:strip.dataset.value || '0' }));
+      if (previous.length!==text.length || !$('.digit-strip',container)) {
+        container.replaceChildren();
+        for (const character of text) {
+          if (!/\d/.test(character)) { const span=document.createElement('span'); span.textContent=character; container.append(span); continue; }
+          const digit=document.createElement('span'); digit.className='digit'; const strip=document.createElement('span'); strip.className='digit-strip';
+          for (let number=0;number<10;number++) { const span=document.createElement('span'); span.textContent=String(number); strip.append(span); }
+          strip.dataset.value=character; strip.style.transform=`translateY(-${Number(character)*1.15}em)`; digit.append(strip); container.append(digit);
+        }
+      } else {
+        const numbers=text.replace(/\D/g,'');
+        $$('.digit-strip',container).forEach((strip,index) => {
+          strip.getAnimations?.().forEach(animation => animation.cancel());
+          const old=Number(oldStrips[index].y),next=Number(numbers[index]); strip.dataset.value=String(next); strip.style.transform=`translateY(-${next*1.15}em)`;
+          if (animate && old!==next) scope.animate(strip,[{transform:`translateY(-${old*1.15}em)`},{transform:`translateY(-${next*1.15}em)`}],{duration:TIMING.normal+index*TIMING.stagger});
+        });
+      }
+      container.dataset.number=text; container.setAttribute('aria-label',currency?`${new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(value)} dollars`:text); container.setAttribute('role','img'); $$(':scope > span',container).forEach(span => span.setAttribute('aria-hidden','true'));
+    }
+    class Pricing extends Component {
+      static get observedAttributes() { return ['state','billing','currency']; }
+      setup() { this.billing=this.getAttribute('billing')==='yearly'?'yearly':'monthly'; $$('[data-billing]',this).forEach(button => this.scope.on(button,'click',() => this.setAttribute('billing',button.dataset.billing))); $$('[data-plan]',this).forEach(button => this.scope.on(button,'click',() => { const plan=button.dataset.plan; $('c-toasts')?.push({kind:'success',title:`A good start: ${plan}.`,message:'This is a demo selection. No purchase was made.'}); this.emit('plan',{plan,billing:this.billing}); })); this.render(false); }
+      attributeChanged(name,value) { if (name==='billing') { this.billing=value==='yearly'?'yearly':'monthly'; this.render(true); this.emit('billing',{billing:this.billing}); } else if (name==='currency') this.render(false); }
+      render(animate) {
+        const yearly=this.billing==='yearly'; const rtl=getComputedStyle(this).direction==='rtl'; $('.billing-indicator',this).style.transform=`translateX(${yearly?(rtl?'-':'')+'100%':'0'})`;
+        let currency=this.getAttribute('currency') || 'USD',money;
+        try { money=new Intl.NumberFormat('en-US',{style:'currency',currency,maximumFractionDigits:0}); } catch (_) { currency='USD'; money=new Intl.NumberFormat('en-US',{style:'currency',currency,maximumFractionDigits:0}); }
+        const symbol=money.formatToParts(0).find(part => part.type==='currency')?.value || '$';
+        $$('[data-billing]',this).forEach(button => button.setAttribute('aria-pressed',String(button.dataset.billing===this.billing)));
+        $$('.price-card',this).forEach(card => { const price=Number(card.dataset[this.billing]) || 0; $('.price > span:first-child',card).textContent=symbol; rollNumber(this.scope,$('[data-price]',card),price,{animate}); $('[data-price]',card).setAttribute('aria-label',`${price} ${currency} per month${yearly?`, ${price*12} billed yearly`:''}`); });
+        const totals=$$('.price-card',this).map(card => `${$('h3',card).textContent} ${money.format((Number(card.dataset.yearly) || 0)*12)}`).join(', ');
+        $('[data-billing-caption]',this).textContent=yearly?`Yearly billing: ${totals} per year. Prices shown per month, in ${currency}. Demo plans.`:`Monthly billing. All prices in ${currency}. Demo plans — no purchase is made.`;
+        $('[data-price-status]',this).textContent=`${yearly?'Yearly':'Monthly'} prices selected. ${$('[data-billing-caption]',this).textContent}`;
+      }
+    }
+
+    class Carousel extends Component {
+      static get observedAttributes() { return ['state','autoplay']; }
+      setup() {
+        this.viewport=$('.carousel-viewport',this); this.track=$('.carousel-track',this); this.slides=$$('.scene',this); this.index=0; this.playing=this.getAttribute('autoplay')==='true' && !Motion.reduced; this.hover=false; this.focused=false; this.drag=null; this.stepWidth=1; this.maximum=0; this.position=0;
+        this.viewport.classList.add('is-enhanced'); this.viewport.scrollLeft=0;
+        this.spring=new Spring(this.scope,{x:0},value => { this.position=value.x; this.track.style.transform=`translate3d(${-value.x}px,0,0)`; },() => this.track.style.removeProperty('will-change'));
+        this.measure=() => { if (!this.slides.length) return; const gap=parseFloat(getComputedStyle(this.track).gap) || 0; this.stepWidth=this.slides[0].getBoundingClientRect().width+gap; this.maximum=Math.max(0,this.track.scrollWidth-this.viewport.clientWidth); this.spring.target.x=Math.min(this.index*this.stepWidth,this.maximum); this.spring.snap(); };
+        this.resize(this.viewport,this.measure);
+        this.scope.on($('[data-prev]',this),'click',() => this.goTo(this.index-1)); this.scope.on($('[data-next]',this),'click',() => this.goTo(this.index+1));
+        $$('[data-slide]',this).forEach(button => this.scope.on(button,'click',() => this.goTo(Number(button.dataset.slide))));
+        this.scope.on($('[data-autoplay]',this),'click',() => { this.playing=!this.playing; this.setAttribute('autoplay',String(this.playing)); this.schedule(); });
+        this.scope.on(this.viewport,'keydown',event => { const rtl=getComputedStyle(this).direction==='rtl'; const keys=['ArrowRight','ArrowLeft','Home','End']; if (!keys.includes(event.key)) return; event.preventDefault(); if (event.key==='Home') this.goTo(0); else if (event.key==='End') this.goTo(this.slides.length-1); else this.goTo(this.index+((event.key==='ArrowRight')!==rtl?1:-1)); });
+        this.scope.on(this,'pointerenter',event => { if (event.pointerType!=='touch') { this.hover=true; this.schedule(); } }); this.scope.on(this,'pointerleave',() => { this.hover=false; this.schedule(); });
+        this.scope.on(this,'focusin',() => { this.focused=true; this.schedule(); }); this.scope.on(this,'focusout',() => this.scope.after(() => { this.focused=this.contains(document.activeElement); this.schedule(); },0));
+        this.scope.on(this.viewport,'pointerdown',event => {
+          if (event.button!==0 || event.target.closest('button,a')) return;
+          this.spring.target.x=this.position; this.spring.snap(); const now=performance.now(); this.drag={ id:event.pointerId,start:event.clientX,last:event.clientX,startY:event.clientY,position:this.position,time:now,velocity:0,moved:false };
+          this.viewport.setPointerCapture?.(event.pointerId); this.viewport.classList.add('dragging'); this.track.style.willChange='transform'; this.schedule();
+        });
+        this.scope.on(this.viewport,'pointermove',event => {
+          const drag=this.drag; if (!drag || event.pointerId!==drag.id) return;
+          const now=performance.now(),elapsed=Math.max(1,now-drag.time); drag.velocity=drag.velocity*.5+((event.clientX-drag.last)/elapsed)*.5; drag.last=event.clientX; drag.time=now;
+          const dx=event.clientX-drag.start; if (Math.abs(dx)>5) drag.moved=true;
+          let proposed=drag.position-dx; if (proposed<0) proposed*=.28; if (proposed>this.maximum) proposed=this.maximum+(proposed-this.maximum)*.28;
+          this.position=proposed; this.track.style.transform=`translate3d(${-proposed}px,0,0)`;
+        });
+        const release=(event,cancel=false) => {
+          const drag=this.drag; if (!drag || event.pointerId!==drag.id) return; this.drag=null; this.viewport.classList.remove('dragging');
+          if (this.viewport.hasPointerCapture?.(drag.id)) this.viewport.releasePointerCapture(drag.id);
+          const speed=performance.now()-drag.time>100?0:drag.velocity;
+          const projected=clamp(this.position-(cancel?0:speed*1000*PHYSICS.velocityProjection),0,this.maximum);
+          let nearest=0,distance=Infinity; this.slides.forEach((_,index) => { const delta=Math.abs(Math.min(index*this.stepWidth,this.maximum)-projected); if (delta<distance) { distance=delta; nearest=index; } });
+          this.spring.value.x=this.position; this.spring.velocity.x=cancel?0:-speed*1000; this.goTo(nearest); this.schedule();
+        };
+        this.scope.on(this.viewport,'pointerup',event => release(event)); this.scope.on(this.viewport,'pointercancel',event => release(event,true)); this.scope.on(this.viewport,'lostpointercapture',event => release(event,true));
+        this.scope.on(document,'claude:motionchange',() => { if (Motion.reduced) this.playing=false; this.updateControls(); this.schedule(); });
+        this.scope.add(() => { if (this.drag && this.viewport.hasPointerCapture?.(this.drag.id)) this.viewport.releasePointerCapture(this.drag.id); this.drag=null; });
+        this.measure(); this.updateControls(); this.schedule();
+      }
+      attributeChanged(name,value) { if (name==='autoplay') { this.playing=value==='true' && !Motion.reduced; this.updateControls(); this.schedule(); } }
+      goTo(index,automatic=false) { if (!this.slides.length) return; this.index=clamp(index,0,this.slides.length-1); this.track.style.willChange=Motion.reduced?'auto':'transform'; this.spring.to({x:Math.min(this.index*this.stepWidth,this.maximum)}); this.updateControls(); $('[data-carousel-status]',this).textContent=automatic?'':`Slide ${this.index+1} of ${this.slides.length}.`; this.emit('slide',{index:this.index,automatic}); }
+      updateControls() { $('[data-prev]',this).disabled=this.index===0; $('[data-next]',this).disabled=this.index===this.slides.length-1; $$('[data-slide]',this).forEach(button => button.setAttribute('aria-current',String(Number(button.dataset.slide)===this.index))); $('[data-slide-counter]',this).textContent=`${String(this.index+1).padStart(2,'0')} / ${String(this.slides.length).padStart(2,'0')}`; const button=$('[data-autoplay]',this); button.setAttribute('aria-pressed',String(this.playing)); button.textContent=this.playing?'Pause Ⅱ':'Play ▷'; button.disabled=Motion.reduced || this.slides.length<2; }
+      visibilityChanged() { if (this.spring) this.schedule(); }
+      dispose() { this.viewport.classList.remove('is-enhanced','dragging'); this.track.style.removeProperty('transform'); this.track.style.removeProperty('will-change'); }
+      schedule() { this.scope?.clear(this.autoplayTimer); if (!this.scope || this.scope.closed) return;
+        // An explicit Play request may retain focus on its own control; entering
+        // any other carousel control pauses rotation. Automatic slides stay quiet.
+        const focusAllowsRotation=!this.focused || document.activeElement===$('[data-autoplay]',this);
+        if (this.playing && this.active && !this.hover && focusAllowsRotation && !this.drag && !Motion.reduced) this.autoplayTimer=this.scope.after(() => { this.goTo((this.index+1)%this.slides.length,true); this.schedule(); },Math.max(2000,Number(this.getAttribute('interval')) || 5000));
+      }
+    }
+
+    const SEED_DATA=[14200,15100,14800,16300,15900,17300,16900,18700,18100,20100,19500,20900,20300,22400,21800,23100,22600,24500,23700,25200,24600,26400,25700,27400];
+    class DataCard extends Component {
+      setup() {
+        this._values ||= SEED_DATA.slice(); this.live=true; this.scrubbing=false; this.chart=$('.chart',this); this.kpi=$('[data-kpi]',this); this.cursor=$('.chart-cursor',this); this.svg=$('svg',this); this.bounds=null; this.currentIndex=this._values.length-1; this.tickCount=0; this.drawReady=false; this.drawPlayed=false;
+        const gradient=$('linearGradient',this); gradient.id=`${this.uid}-fill`; $('.chart-area',this).style.fill=`url(#${gradient.id})`;
+        this.kpi.style.display='inline-flex'; this.kpi.style.height='1.15em'; this.kpi.style.overflow='hidden';
+        this.renderData(false); this.resize(this.chart,() => { this.bounds=this.chart.getBoundingClientRect(); });
+        this.scope.on(this.chart,'pointerenter',() => this.bounds=this.chart.getBoundingClientRect());
+        this.scope.on(this.chart,'pointermove',event => { if (!this.bounds || !this._values.length) return; this.scrubbing=true; this.scrub(Math.round(clamp((event.clientX-this.bounds.left)/this.bounds.width,0,1)*(this._values.length-1))); });
+        this.scope.on(this.chart,'pointerdown',event => { this.bounds=this.chart.getBoundingClientRect(); this.scrubbing=true; this.scrub(Math.round(clamp((event.clientX-this.bounds.left)/this.bounds.width,0,1)*(this._values.length-1))); });
+        const reset=() => { this.scrubbing=false; this.cursor.style.opacity='0'; this.currentIndex=this._values.length-1; this.showKpi(this._values[this.currentIndex],true); this.chart.setAttribute('aria-valuenow',String(this._values.length)); this.chart.setAttribute('aria-valuetext',`Day ${this._values.length}: ${this._values[this.currentIndex] || 0} dollars`); $('[data-day]',this).textContent=`OCT ${String(this._values.length).padStart(2,'0')}`; $('[data-chart-caption]',this).textContent='Steady progress. A little, every day.'; };
+        this.scope.on(this.chart,'pointerleave',reset); this.scope.on(this.chart,'blur',reset);
+        this.scope.on(this.chart,'keydown',event => { if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key) || !this._values.length) return; event.preventDefault(); this.scrubbing=true; const rtl=getComputedStyle(this).direction==='rtl'; const index=event.key==='Home'?0:event.key==='End'?this._values.length-1:this.currentIndex+((event.key==='ArrowRight')!==rtl?1:-1); this.scrub(clamp(index,0,this._values.length-1)); });
+        this.scope.on($('[data-live]',this),'click',() => { this.live=!this.live; this.updateLive(); this.schedule(); });
+        this.scope.on(document,'claude:motionchange',() => { if (Motion.reduced) this.live=false; this.updateLive(); this.schedule(); });
+        if (Motion.reduced) this.live=false; this.updateLive();
+        this.drawReady=true; if (!('IntersectionObserver' in window)) this.revealChart(); this.schedule();
+      }
+      get values() { return this._values.slice(); }
+      set values(value) { this.setData(value); }
+      setData(values) {
+        if (!Array.isArray(values) || values.some(value => !Number.isFinite(value) || value<0 || value>Number.MAX_SAFE_INTEGER)) { this.setAttribute('state','error'); return; }
+        this._values=values.slice(0,1000); this.currentIndex=this._values.length-1;
+        if (!this._values.length) { this.setAttribute('state','empty'); return; } this.setAttribute('state','ready'); if (this.chart) this.renderData(true); this.emit('data',{values:this._values.slice()});
+      }
+      renderData(animate) {
+        if (!this._values.length) return; const min=Math.min(...this._values),max=Math.max(...this._values),range=max-min || 1;
+        this.points=this._values.map((value,index) => ({x:this._values.length===1?240:index/(this._values.length-1)*480,y:max===min?75:130-(value-min)/range*110}));
+        const points=this.points; const path=points.map((point,index) => `${index?'L':'M'}${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(''); $('.chart-path',this).setAttribute('d',points.length===1?`M0 75H480`:path); $('.chart-area',this).setAttribute('d',points.length===1?'M0 75H480V150H0Z':`${path}V150H0Z`);
+        this.chart.setAttribute('aria-valuemax',String(this._values.length)); this.chart.setAttribute('aria-valuenow',String(this._values.length)); this.chart.setAttribute('aria-valuetext',`Day ${this._values.length}: ${this._values[this._values.length-1]} dollars`); this.showKpi(this._values[this._values.length-1],animate);
+        const first=this._values[0],last=this._values[this._values.length-1]; $('[data-trend]',this).textContent=first===0?(last===0?'— 0%':'↗ from $0'):`${last>=first?'↗':'↘'} ${Math.abs((last-first)/first*100).toFixed(1)}%`;
+      }
+      showKpi(value,animate) { rollNumber(this.scope,this.kpi,Number.isFinite(value)?value:0,{currency:true,animate}); }
+      scrub(index) { this.currentIndex=index; const point=this.points[index]; this.cursor.style.opacity='1'; const rtl=root.dir==='rtl'; const x=(rtl?1-point.x/480:point.x/480)*(this.bounds?.width || 0); this.cursor.style.transform=`translateX(${rtl?-x:x}px)`; this.cursor.style.setProperty('--dot-y',`${point.y/150*100}%`); this.showKpi(this._values[index],false); this.chart.setAttribute('aria-valuenow',String(index+1)); this.chart.setAttribute('aria-valuetext',`Day ${index+1}: ${this._values[index]} dollars`); $('[data-chart-caption]',this).textContent=`Day ${String(index+1).padStart(2,'0')} — a moment in the bigger picture.`; $('[data-day]',this).textContent=`OCT ${String(index+1).padStart(2,'0')}`; }
+      recover() { this.setData(SEED_DATA); }
+      updateLive() { const button=$('[data-live]',this); button.textContent=this.live?'Pause updates':'Resume updates'; button.setAttribute('aria-pressed',String(this.live)); $('[data-feed-label]',this).textContent=this.live?'Live':'Paused'; }
+      revealChart() {
+        if (!this.drawReady || this.drawPlayed || !this.ready) return; this.drawPlayed=true;
+        this.scope.animate($('.chart-reveal',this),[{transform:'translateX(-100%)'},{transform:'translateX(0)'}],{duration:TIMING.chart});
+        this.scope.animate(this.svg,[{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:TIMING.chart});
+        $$('.digit-strip',this.kpi).forEach((strip,index) => this.scope.animate(strip,[{opacity:0,transform:'translateY(0)'},{opacity:1,transform:strip.style.transform}],{duration:TIMING.entrance,delay:index*TIMING.stagger}));
+      }
+      visibilityChanged() { if (this.chart) { if (this.active) this.revealChart(); this.schedule(); } }
+      schedule() { this.scope?.clear(this.dataTimer); if (!this.scope || this.scope.closed || !this.live || !this.active || Motion.reduced) return; this.dataTimer=this.scope.after(() => { if (!this.scrubbing && this._values.length) { this.tickCount++; this._values=this._values.map((value,index) => Math.max(0,value+Math.round(Math.sin(index+this.tickCount)*110))); this.renderData(true); this.emit('data',{values:this._values.slice()}); } this.schedule(); },Math.max(2000,Number(this.getAttribute('interval')) || 6500)); }
+    }
+
+    class MultiForm extends Component {
+      static get observedAttributes() { return ['state','step']; }
+      setup() {
+        this.form=$('form',this); this.steps=$$('[data-step]',this); this.stepIndex=clamp(Number(this.getAttribute('step')) || 0,0,this.steps.length-1); this.touched=new Set();
+        $('[data-continue]',this).disabled=false;
+        $$('input[id],select[id]',this).forEach(input => { if (!input.id.endsWith(this.uid)) { const old=input.id; const label=$(`label[for="${old}"]`,this); input.id=`${old}-${this.uid}`; if (label) label.htmlFor=input.id; const described=input.getAttribute('aria-describedby'); if (described) { const error=$(`[id="${described}"]`,this); if (error) { error.id=`${described}-${this.uid}`; input.setAttribute('aria-describedby',error.id); } } } });
+        const consent=$('[name=consent]',this); const consentError=$('#consent-error',this); if (consentError) { consentError.id=`consent-error-${this.uid}`; consent.setAttribute('aria-describedby',consentError.id); }
+        $$('input',this.form).forEach(input => { this.scope.on(input,'blur',() => { this.touched.add(input.name); this.validate(input); }); this.scope.on(input,'input',() => { if (this.touched.has(input.name)) this.validate(input); }); });
+        this.scope.on(this.form,'submit',event => { event.preventDefault(); const inputs=$$('input[required]',this.steps[this.stepIndex]); const invalid=inputs.filter(input => { this.touched.add(input.name); return !this.validate(input); }); if (invalid.length) { focus(invalid[0]); $('[data-form-status]',this).textContent='A little more care: please check the highlighted fields.'; this.scope.animate(invalid[0],[{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:TIMING.normal}); return; } if (this.stepIndex<this.steps.length-1) { this.stepIndex++; this.render(true); } else this.complete(); });
+        this.scope.on($('[data-back]',this),'click',() => { this.stepIndex=Math.max(0,this.stepIndex-1); this.render(true); }); this.scope.on($('[data-reset]',this),'click',() => this.reset());
+        this.render(false);
+      }
+      attributeChanged(name,value) { if (name==='step') { this.stepIndex=clamp(Number(value) || 0,0,this.steps.length-1); this.render(true); } }
+      validate(input) { let error=''; const value=input.value.trim(); if (input.type==='checkbox') { if (!input.checked) error='Please confirm that you understand this is a demo.'; } else if (!value) error='A little detail is missing. Please fill this in.'; else if (input.type==='email' && !input.validity.valid) error='That email needs another look. Try name@studio.com.'; else if (input.minLength>0 && value.length<input.minLength) error=`A little longer, please — at least ${input.minLength} characters.`; const errorNode=$(`[id="${input.getAttribute('aria-describedby')}"]`,this); if (errorNode) errorNode.textContent=error; input.setAttribute('aria-invalid',String(!!error)); return !error; }
+      render(moveFocus) {
+        this.steps.forEach((step,index) => step.hidden=index!==this.stepIndex); $$('[class="form-progress"] span',this).forEach((span,index) => span.classList.toggle('active',index<=this.stepIndex)); $('.form-progress',this).setAttribute('aria-label',`Step ${this.stepIndex+1} of ${this.steps.length}`); $('.form-progress',this).setAttribute('aria-valuenow',String(this.stepIndex+1)); $('[data-step-label]',this).textContent=`0${this.stepIndex+1} / 0${this.steps.length}`; $('[data-back]',this).hidden=this.stepIndex===0; $('[data-continue]',this).textContent=this.stepIndex===this.steps.length-1?'Finish the demo ↗':'Continue ↗';
+        if (this.stepIndex===2) { const review=$('[data-review]',this); review.replaceChildren(); [['Name','name'],['Email','email'],['Project','project'],['Direction','kind']].forEach(([label,key]) => { const dt=document.createElement('dt'); dt.textContent=label; const dd=document.createElement('dd'); dd.textContent=this.form.elements.namedItem(key).value; review.append(dt,dd); }); }
+        if (moveFocus) { const step=this.steps[this.stepIndex]; this.scope.animate(step,[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}]); focus($('input,select',step)); $('[data-form-status]',this).textContent=`Step ${this.stepIndex+1} of ${this.steps.length}.`; this.emit('step',{step:this.stepIndex}); }
+      }
+      complete() { this.form.hidden=true; const success=$('.success-view',this); success.hidden=false; focus(success); this.scope.animate($('.success-mark',success),[{opacity:0,transform:'scale(.6) rotate(-15deg)'},{opacity:1,transform:'scale(1) rotate(0)'}],{duration:TIMING.entrance}); this.scope.animate($('h4',success),[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{delay:TIMING.stagger*2}); announce('Your demo enquiry is complete. No data was sent.'); this.emit('complete',{local:true,fields:Object.fromEntries(new FormData(this.form).entries())}); }
+      reset() { this.form.reset(); this.form.hidden=false; $('.success-view',this).hidden=true; this.touched.clear(); $$('[aria-invalid]',this).forEach(input => input.removeAttribute('aria-invalid')); $$('.field-error',this).forEach(error => error.textContent=''); this.stepIndex=0; this.render(true); }
+      dispose() { $('[data-continue]',this).disabled=true; }
+    }
+
+    const MENUS={
+      explore:[['The collection','Ten considered interactions','collection'],['Sculptural studies','Find a different perspective','carousel'],['Plans & possibilities','A little room to grow','pricing'],['Living data','A clearer view of progress','collection']],
+      studio:[['Our approach','Care in every detail','principles'],['Say hello','Start a conversation','form']],
+      learn:[['Under the hood','Tokens, APIs and philosophy','documentation'],['Quality checks','A little peace of mind','checks'],['Motion studies','Physics that feel familiar','principles']]
+    };
+    class MegaNav extends Component {
+      static get observedAttributes() { return ['state','menu']; }
+      setup() {
+        this.panel=$('.mega-panel',this); this.panel.id=`${this.uid}-panel`; this.triggers=$$('[data-menu]',this); this.current=null; this.generation=0; this.triggers.forEach(button => button.setAttribute('aria-controls',this.panel.id));
+        this.triggers.forEach((button,index) => { this.scope.on(button,'click',() => this.current===button.dataset.menu?this.closeMenu():this.openMenu(button.dataset.menu)); this.scope.on(button,'pointerenter',event => { if (event.pointerType!=='touch' && this.current) this.openMenu(button.dataset.menu); }); this.scope.on(button,'keydown',event => { if (event.key==='ArrowDown') { event.preventDefault(); this.openMenu(button.dataset.menu,true); } else if (['ArrowLeft','ArrowRight'].includes(event.key)) { event.preventDefault(); const rtl=getComputedStyle(this).direction==='rtl'; focus(this.triggers[(index+((event.key==='ArrowRight')!==rtl?1:-1)+this.triggers.length)%this.triggers.length]); } }); });
+        this.scope.on(document,'pointerdown',event => { if (!this.contains(event.target)) this.closeMenu(); }); this.scope.on(this,'keydown',event => { if (event.key==='Escape' && this.current) { const trigger=this.triggers.find(button => button.dataset.menu===this.current); this.closeMenu(); focus(trigger); } });
+        this.scope.on(this,'focusout',() => this.scope.after(() => { if (!this.contains(document.activeElement)) this.closeMenu(); },0));
+        this.scope.on(this.panel,'click',event => { const link=event.target.closest('a'); if (link) { this.closeMenu(); if (link.hash==='#documentation') $('#documentation').open=true; } });
+        this.drawer=$('.mobile-drawer',this); this.drawerModal=modal(this,this.drawer); this.scope.on($('[data-drawer]',this),'click',() => this.drawerModal.open()); this.scope.on($('[data-close-drawer]',this),'click',() => this.drawerModal.close()); this.scope.on(this.drawer,'click',event => { if (event.target.closest('a')) this.drawerModal.close(); });
+        this.resize(this,() => { if (this.clientWidth<=400) this.closeMenu(); else this.drawerModal.close(); });
+        const requested=this.getAttribute('menu'); if (requested && MENUS[requested]) this.openMenu(requested);
+      }
+      attributeChanged(name,value) { if (name==='menu') value?this.openMenu(value):this.closeMenu(); }
+      openMenu(key,moveFocus=false) {
+        if (!MENUS[key]) return;
+        const previous=this.panel.hidden?null:this.panel.getBoundingClientRect(); this.current=key; const generation=++this.generation; this.panel.getAnimations?.().forEach(animation => animation.cancel()); this.panel.hidden=false; this.panel.setAttribute('aria-label',key[0].toUpperCase()+key.slice(1));
+        this.triggers.forEach(button => button.setAttribute('aria-expanded',String(button.dataset.menu===key)));
+        const content=$('.mega-content',this.panel); content.replaceChildren();
+        MENUS[key].forEach(([label,description,target]) => { const link=document.createElement('a'); link.href=`#${target}`; link.textContent=`${label} ↗`; const small=document.createElement('small'); small.textContent=description; link.append(small); content.append(link); });
+        this.scope.frame(() => {
+          if (generation!==this.generation || this.panel.hidden) return; const next=this.panel.getBoundingClientRect();
+          if (previous && next.width && next.height) this.scope.animate(this.panel,[{transform:`translate(${previous.left-next.left}px,${previous.top-next.top}px) scale(${previous.width/next.width},${previous.height/next.height})`},{transform:'none'}]);
+          else this.scope.animate(this.panel,[{opacity:0,transform:'translateY(-8px) scale(.98)'},{opacity:1,transform:'none'}]);
+          this.scope.animate(content,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:TIMING.normal,delay:TIMING.stagger});
+          if (moveFocus) focus($('a',content));
+        }); this.emit('menu',{menu:key});
+      }
+      closeMenu() { this.current=null; this.generation++; this.panel.hidden=true; this.panel.getAnimations?.().forEach(animation => animation.cancel()); this.triggers.forEach(button => button.setAttribute('aria-expanded','false')); }
+      dispose() { this.drawerModal?.close(); }
+    }
+
+    class Marquee extends Component {
+      static get observedAttributes() { return ['state','paused']; }
+      setup() {
+        this.track=$('.marquee-track',this); this.paused=this.hasAttribute('paused'); this.manualPause=this.paused;
+        $$('[data-duplicate]',this.track).forEach(node => node.remove());
+        const originals=Array.from(this.track.children); originals.forEach(node => { const duplicate=node.cloneNode(true); duplicate.dataset.duplicate=''; duplicate.setAttribute('aria-hidden','true'); duplicate.inert=true; duplicate.setAttribute('inert',''); $$('[id]',duplicate).forEach(element => element.removeAttribute('id')); this.track.append(duplicate); });
+        this.scope.on($('[data-marquee-pause]',this),'click',() => { this.manualPause=!this.manualPause; this.pause(this.manualPause); });
+        this.scope.on(this.track,'pointerdown',event => { if (event.pointerType==='touch' || event.pointerType==='pen') { this.manualPause=true; this.pause(true); } });
+        this.scope.on(this.track,'focusin',() => this.track.style.animationPlayState='paused'); this.scope.on(this.track,'focusout',() => this.visibilityChanged());
+        this.scope.on(document,'claude:motionchange',() => this.visibilityChanged()); this.pause(this.paused);
+      }
+      attributeChanged(name) { if (name==='paused') { this.manualPause=this.hasAttribute('paused'); this.pause(this.manualPause); } }
+      pause(paused=true) { this.paused=paused; this.toggleAttribute('data-paused',paused); const button=$('[data-marquee-pause]',this); button.setAttribute('aria-pressed',String(paused)); button.textContent=paused?'Resume the flow':'Pause the flow'; this.visibilityChanged(); this.emit('pause',{paused}); }
+      visibilityChanged() { if (this.track) this.track.style.animationPlayState=this.active && !this.paused && !this.track.contains(document.activeElement) && !Motion.reduced?'':'paused'; }
+      dispose() { this.track.style.animationPlayState='paused'; $$('[data-duplicate]',this).forEach(node => node.remove()); }
+    }
+
+    class ToastSystem extends Component {
+      setup() {
+        this.stack=$('.toast-stack',this); this.queue=[]; this.toasts=[]; this.queueLimit=50; this.nextToast=0;
+        $$('[data-toast]',this).forEach(button => this.scope.on(button,'click',() => this.push(button.dataset.toast==='error'?{kind:'error',title:'A small hiccup.',message:'Something needed a second look. This demo alert stays until you dismiss it.'}:{kind:'success',title:'Everything in its right place.',message:'Your changes are saved — in this demonstration, at least.'})));
+        this.scope.on($('[data-burst]',this),'click',() => { for (let index=0;index<6;index++) this.push({kind:'success',title:`A little good news. ${index+1}/6`,message:'One moment at a time. The rest wait their turn.'}); });
+        this.scope.on(document,'visibilitychange',() => this.toasts.forEach(record => document.hidden?record.pause():record.resume()));
+        this.scope.add(() => { this.toasts.forEach(record => record.scope.close()); this.toasts=[]; this.queue=[]; this.stack.replaceChildren(); }); this.updateQueue();
+      }
+      push(input={}) { if (this.scope.closed) return null; const notification={kind:input.kind==='error'?'error':'success',title:String(input.title || 'A little update.'),message:String(input.message || ''),id:++this.nextToast}; if (this.queue.length>=this.queueLimit) this.queue.shift(); this.queue.push(notification); this.flush(); return notification.id; }
+      flush() { const maximum=clamp(Number(this.getAttribute('max')) || 3,1,5); while (this.queue.length && this.toasts.length<maximum) this.show(this.queue.shift()); this.updateQueue(); }
+      updateQueue() { const node=$('[data-queue]',this); if (node) node.textContent=`${this.toasts.length} visible · ${this.queue.length} queued`; }
+      show(notification) {
+        const scope=new Scope(); const node=document.createElement('div'); node.className='toast'; node.dataset.kind=notification.kind; node.dataset.toastId=String(notification.id); node.setAttribute('role','group'); node.setAttribute('aria-label',notification.title);
+        const glyph=document.createElement('span'); glyph.className='toast-glyph'; glyph.setAttribute('aria-hidden','true'); glyph.textContent=notification.kind==='error'?'!':'✓';
+        const copy=document.createElement('div'); const title=document.createElement('strong'); title.textContent=notification.title; const message=document.createElement('p'); message.textContent=notification.message; copy.append(title,message);
+        const close=document.createElement('button'); close.type='button'; close.className='icon-btn'; close.setAttribute('aria-label',`Dismiss: ${notification.title}`); close.textContent='×'; node.append(glyph,copy,close);
+        const before=this.toasts.map(record => [record.node,record.node.getBoundingClientRect().top]); this.stack.append(node);
+        const record={node,scope,id:notification.id,remaining:Math.max(2000,Number(this.getAttribute('duration')) || 5500),started:0,timer:null,dismissing:false,drag:null}; this.toasts.push(record);
+        scope.animate(node,[{opacity:0,transform:'translateY(20px) scale(.97)'},{opacity:1,transform:'none'}]);
+        this.scope.frame(() => before.forEach(([element,top]) => { if (element.isConnected) { const nextTop=element.getBoundingClientRect().top; this.scope.animate(element,[{transform:`translateY(${top-nextTop}px)`},{transform:'none'}]); } }));
+        record.pause=() => { if (record.timer!==null) { scope.clear(record.timer); record.remaining=Math.max(0,record.remaining-(performance.now()-record.started)); record.timer=null; } };
+        record.resume=() => { if (notification.kind==='error' || record.timer!==null || record.dismissing || document.hidden || node.matches(':hover') || node.contains(document.activeElement) || record.drag) return; record.started=performance.now(); record.timer=scope.after(() => this.dismiss(record),record.remaining); };
+        scope.on(node,'pointerenter',record.pause); scope.on(node,'pointerleave',record.resume); scope.on(node,'focusin',record.pause); scope.on(node,'focusout',() => scope.after(record.resume,0)); scope.on(close,'click',() => this.dismiss(record));
+        const spring=new Spring(scope,{x:0},value => node.style.transform=`translateX(${value.x}px)`);
+        scope.on(node,'pointerdown',event => { if (event.button!==0 || event.target.closest('button,a')) return; record.pause(); record.drag={id:event.pointerId,start:event.clientX,last:event.clientX,time:performance.now(),velocity:0,x:0}; node.setPointerCapture?.(event.pointerId); });
+        scope.on(node,'pointermove',event => { const drag=record.drag; if (!drag || drag.id!==event.pointerId) return; const now=performance.now(); drag.velocity=(event.clientX-drag.last)/Math.max(1,now-drag.time); drag.last=event.clientX; drag.time=now; drag.x=event.clientX-drag.start; node.style.transform=`translateX(${drag.x}px)`; node.style.opacity=String(clamp(1-Math.abs(drag.x)/400,.3,1)); });
+        const release=(event,cancel=false) => { const drag=record.drag; if (!drag || drag.id!==event.pointerId) return; record.drag=null; if (node.hasPointerCapture?.(drag.id)) node.releasePointerCapture(drag.id); const speed=performance.now()-drag.time>100?0:drag.velocity; if (!cancel && (Math.abs(drag.x)>PHYSICS.swipeDistance || Math.abs(speed)>PHYSICS.swipeVelocity)) this.dismiss(record,Math.sign(drag.x) || 1); else { node.style.opacity='1'; spring.value.x=drag.x; spring.to({x:0}); record.resume(); } };
+        scope.on(node,'pointerup',event => release(event)); scope.on(node,'pointercancel',event => release(event,true)); scope.on(node,'lostpointercapture',event => release(event,true)); scope.add(() => { if (record.drag && node.hasPointerCapture?.(record.drag.id)) node.releasePointerCapture(record.drag.id); });
+        const live=$(`[data-toast-${notification.kind==='error'?'error':'status'}]`,this); live.textContent=''; this.scope.after(() => live.textContent=`${notification.title} ${notification.message}`,TIMING.announcement); record.resume(); this.emit('toast',{action:'show',...notification});
+      }
+      dismiss(record,direction=0) {
+        if (record.dismissing || this.scope.closed) return; record.dismissing=true; record.pause(); const hadFocus=record.node.contains(document.activeElement);
+        record.scope.animate(record.node,[{opacity:1,transform:record.node.style.transform || 'none'},{opacity:0,transform:direction?`translateX(${direction*420}px)`:'translateY(12px) scale(.96)'}],{duration:TIMING.quick}).then(() => { if (this.scope.closed) return; record.scope.close(); record.node.remove(); this.toasts=this.toasts.filter(item => item!==record); this.flush(); if (hadFocus) focus(this.toasts.length?$('button',this.toasts[this.toasts.length-1].node):$('[data-toast]',this)); this.emit('toast',{action:'dismiss',id:record.id}); });
+      }
+    }
+    const definitions={'c-command':Command,'c-hero':Hero,'c-bento':Bento,'c-pricing':Pricing,'c-carousel':Carousel,'c-data':DataCard,'c-form':MultiForm,'c-nav':MegaNav,'c-marquee':Marquee,'c-toasts':ToastSystem};
+    // Only the preview owns components; the outer lab owns viewport controls.
+    const isOuterLab=!root.hasAttribute('data-embedded') && !!$('#lab-controls') && !!$('#preview-wrap');
+    if ('customElements' in window && !isOuterLab) Object.entries(definitions).forEach(([name,type]) => { if (!customElements.get(name)) customElements.define(name,type); });
+
+    function setTheme(theme,notify=true) {
+      const change=() => { root.dataset.theme=theme; const button=$('#theme-control'); if (button) { button.setAttribute('aria-pressed',String(theme==='dark')); button.setAttribute('aria-label',`Switch to ${theme==='dark'?'light':'dark'} theme`); } const frame=$('#preview-frame'); if (frame?.contentWindow.Claude) frame.contentWindow.Claude.setTheme(theme,false); };
+      if (notify && root.dataset.theme!==theme && document.startViewTransition && !Motion.reduced && !root.hasAttribute('data-probe')) document.startViewTransition(change); else change();
+      if (notify && root.hasAttribute('data-embedded') && window.parent.Claude) window.parent.Claude.setTheme(theme,false);
+      if (!root.hasAttribute('data-embedded')) { try { localStorage.setItem('claude-theme',theme); } catch (_) {} }
+      announce(`${theme==='dark'?'Dark':'Light'} atmosphere selected.`);
+    }
+    function setDirection(direction,notify=true) { root.dir=direction; const button=$('#direction-control'); button?.setAttribute('aria-pressed',String(direction==='rtl')); const frame=$('#preview-frame'); if (frame?.contentWindow.Claude) frame.contentWindow.Claude.setDirection(direction,false); $('c-pricing')?.render(false); $('c-carousel')?.measure(); if (notify && root.hasAttribute('data-embedded') && window.parent.Claude) window.parent.Claude.setDirection(direction,false); announce(`${direction==='rtl'?'Right to left':'Left to right'} layout selected.`); }
+    function sourceDocument({probe=false,reduced=false}={}) {
+      const content=$('#showcase') || $('#preview-frame')?.contentDocument.getElementById('showcase');
+      const script=document.getElementById('claude-code').textContent;
+      const head=Array.from(document.head.children).filter(node => ['META','TITLE','LINK','STYLE'].includes(node.tagName)).map(node => node.outerHTML).join('');
+      return `<!doctype html><html lang="en" data-embedded ${probe?'data-probe':''} ${reduced?'data-reduced':''} data-theme="${root.dataset.theme}" dir="${root.dir || 'ltr'}"><head>${head}</head><body>${content.outerHTML}<script id="claude-code">${script}<\/script></body></html>`;
+    }
+
+    let testsRunning=false;
+    async function runTests() {
+      if (!root.hasAttribute('data-embedded')) { const child=$('#preview-frame')?.contentWindow.Claude; if (child) return child.runTests(); }
+      if (testsRunning) return []; testsRunning=true; const button=$('#run-tests'),list=$('#test-results'); button.disabled=true; button.textContent='Checking…'; list.replaceChildren();
+      const record=(label,pass,detail='') => { const item=document.createElement('li'); const glyph=document.createElement('span'); glyph.className=pass?'pass':'fail'; glyph.textContent=pass?'PASS':'FAIL'; const copy=document.createElement('span'); copy.textContent=`${label}${detail?` — ${detail}`:''}`; item.append(glyph,copy); list.append(item); return {label,pass,detail}; };
+      const results=[]; const frame=document.createElement('iframe'); frame.title='Isolated quality checks'; frame.className='probe-frame'; frame.setAttribute('aria-hidden','true'); frame.setAttribute('tabindex','-1'); frame.srcdoc=sourceDocument({probe:true,reduced:true});
+      let testTimeout; const ready=new Promise((resolve,reject) => { frame.onload=resolve; testTimeout=pageScope.after(() => reject(new Error('The test viewport took too long to load.')),TIMING.testTimeout); });
+      document.body.append(frame);
+      try {
+        await ready; const win=frame.contentWindow,doc=frame.contentDocument; await new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
+        const hosts=Object.keys(definitions).map(name => doc.querySelector(name));
+        results.push(record('All ten components upgraded',hosts.every(node => node && node.scope && !node.scope.closed)));
+        const overflow=[]; doc.querySelectorAll('main,section,.panel,.bento-card,.price-card,.site-nav,.harness,.footer').forEach(node => { const rect=node.getBoundingClientRect(); if (rect.left<-.5 || rect.right>320.5 || node.scrollWidth>node.clientWidth+1) overflow.push(node.className || node.tagName); }); results.push(record('320px overflow',doc.documentElement.scrollWidth<=321 && !overflow.length,overflow.length?overflow.slice(0,4).join(', '):'No horizontal page or card overflow'));
+        const controls=Array.from(doc.querySelectorAll('button,input,select,a[href],summary,.consent')).filter(node => node.getClientRects().length && !node.closest('[hidden],[inert]') && node.type!=='checkbox'); const tooSmall=controls.filter(node => { const rect=node.getBoundingClientRect(); return rect.height<43.5 || (node.tagName==='BUTTON' && rect.width<43.5); }); results.push(record('44px touch targets',!tooSmall.length,tooSmall.length?tooSmall.map(node => node.textContent.trim().slice(0,22)).join(', '):`${controls.length} visible controls checked`));
+        const ordered=Array.from(doc.querySelectorAll(focusSelector)).filter(node => node.getClientRects().length && !node.closest('[hidden],[inert]')); const positive=Array.from(doc.querySelectorAll('[tabindex]')).some(node => Number(node.getAttribute('tabindex'))>0); const focusWorks=ordered.slice(0,5).every(node => { node.focus({preventScroll:true}); return doc.activeElement===node; }); results.push(record('Source-order focus',!positive && focusWorks,'No positive tabindex; focus reaches visible controls'));
+        const command=doc.querySelector('c-command'); command.open(); const input=command.input; input.dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})); const selected=command.selected===1 && input.getAttribute('aria-activedescendant')?.endsWith('option-1'); const close=command.querySelector('[data-close]'); close.focus(); close.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true})); const trapped=doc.activeElement===input; command.close(); results.push(record('Command keyboard & modal trap',selected && trapped));
+        command.open(); input.value='zzzzzz'; input.dispatchEvent(new win.Event('input',{bubbles:true})); results.push(record('Fuzzy search empty result',command.results.length===0 && !!command.list.querySelector('[role=status]'))); command.close();
+        win.Claude.setReduced(false); const carousel=doc.querySelector('c-carousel'); carousel.setAttribute('autoplay','true'); win.Claude.setReduced(true); await new Promise(resolve => win.requestAnimationFrame(resolve));
+        const duration=win.getComputedStyle(doc.querySelector('.marquee-track')).animationName;
+        results.push(record('Reduced-motion path',win.Claude.reduced && duration==='none' && !carousel.playing && win.Claude.activeSprings===0 && (!doc.getAnimations || doc.getAnimations().every(animation => animation.playState!=='running')),'Runtime preference changes stop animations and autoplay'));
+        let states=true; for (const host of hosts) { host.setAttribute('state','empty'); states=states && host.content.hidden && !host.statePanel.hidden && !!host.statePanel.textContent.trim(); host.setAttribute('state','ready'); } results.push(record('All ten empty states',states));
+        const data=doc.querySelector('c-data'); data.setData([0,0,0]); const finite=!data.querySelector('.chart-path').getAttribute('d').includes('NaN') && data.kpi.getAttribute('aria-label')==='0 dollars'; data.setData([]); const zero=data.getAttribute('state')==='empty'; data.setData([NaN]); const invalid=data.getAttribute('state')==='error'; data.setData(SEED_DATA); results.push(record('Zero / empty / invalid data',finite && zero && invalid));
+        win.Claude.setDirection('rtl',false); await new Promise(resolve => win.requestAnimationFrame(resolve)); results.push(record('RTL at 320px',doc.documentElement.scrollWidth<=321 && win.getComputedStyle(doc.querySelector('.page')).direction==='rtl')); win.Claude.setDirection('ltr',false);
+        const toasts=doc.querySelector('c-toasts'); for (let index=0;index<6;index++) toasts.push({kind:'success',title:`Check ${index}`,message:'Queue test'}); results.push(record('Bounded toast queue',toasts.toasts.length===3 && toasts.queue.length===3)); const toastScopes=toasts.toasts.map(item => item.scope); toasts.remove(); results.push(record('Disconnect resource cleanup',toasts.scope.closed && toastScopes.every(scope => scope.closed && scope.timers.size===0) && toasts.stack.children.length===0));
+        const detached=data.scope; data.remove(); results.push(record('Data timer cleanup',detached.closed && detached.timers.size===0));
+        const link=doc.querySelector('.site-nav .wordmark'); const handled=!link.dispatchEvent(new win.MouseEvent('click',{bubbles:true,cancelable:true}));
+        results.push(record('Internal navigation stays in preview',handled && frame.contentDocument===doc && !doc.querySelector('#preview-frame'),'Fragment links do not load a nested showcase'));
+      } catch (error) { results.push(record('Harness execution',false,error.message)); }
+      finally { pageScope.clear(testTimeout); frame.remove(); testsRunning=false; button.disabled=false; button.textContent='Run again ↗'; announce(`${results.filter(item => item.pass).length} of ${results.length} checks passed.`); }
+      return results;
+    }
+
+    window.Claude={version:'1.0.0',Spring,Scope,runTests,setTheme,setDirection,sourceDocument,navigate,standaloneSource,openPalette:() => $('c-command')?.open(),setReduced(value) { root.toggleAttribute('data-reduced',!!value); Motion.sync(); },get reduced() { return Motion.reduced; },get activeSprings() { return Motion.active.size; },destroy() { Object.keys(definitions).forEach(name => $$(name).forEach(node => node.destroy?.())); Motion.destroy(); pageScope.close(); }};
+    pageScope.on(window,'pagehide',event => { if (!event.persisted) window.Claude.destroy(); });
+    // A srcdoc inherits the parent URL as its base. A bare #fragment would
+    // otherwise load the outer lab inside the preview instead of scrolling it.
+    if (root.hasAttribute('data-embedded')) pageScope.on(document,'click',event => {
+      const link=event.target.closest?.('a[href^="#"]'); if (!link) return;
+      const id=link.getAttribute('href').slice(1); if (!document.getElementById(id)) return;
+      event.preventDefault(); const target=document.getElementById(id); if (target.tagName==='DETAILS') target.open=true; navigate(id);
+    });
+    if ($('#run-tests')) pageScope.on($('#run-tests'),'click',runTests);
+    $$('a[download]').forEach(link => pageScope.on(link,'click',event => {
+      event.preventDefault(); const source=root.hasAttribute('data-embedded') && window.parent.Claude ? window.parent.Claude.standaloneSource : standaloneSource;
+      const url=URL.createObjectURL(new Blob([source],{type:'text/html;charset=utf-8'})); const download=document.createElement('a'); download.href=url; download.download='claude-index.html'; document.body.append(download); download.click(); download.remove();
+      pageScope.after(() => URL.revokeObjectURL(url),1000); pageScope.add(() => URL.revokeObjectURL(url));
+    }));
+    if (root.hasAttribute('data-embedded')) $$('[data-open-command]').forEach(button => pageScope.on(button,'click',() => $('c-command')?.open()));
+
+    if (isOuterLab) {
+      let saved; try { saved=localStorage.getItem('claude-theme'); } catch (_) {} if (saved==='dark' || saved==='light') root.dataset.theme=saved;
+      const wrapper=$('#preview-wrap'),controls=$('#lab-controls'),range=$('#width-control'),output=$('#width-output');
+      const frame=document.createElement('iframe'); frame.id='preview-frame'; frame.className='preview-frame'; frame.title='Claude — interactive component showcase';
+      let fitted=true,requested=1440,resizePending=false;
+      const size=() => {
+        resizePending=false; const available=Math.max(0,wrapper.clientWidth); const height=Math.max(300,window.innerHeight-controls.getBoundingClientRect().height); wrapper.style.height=`${height}px`;
+        if (fitted) requested=Math.max(320,Math.round(available)); const scale=Math.min(1,available/requested); frame.style.width=`${requested}px`; frame.style.height=`${height/Math.max(.01,scale)}px`; frame.style.transform=`scale(${scale})`; range.value=String(clamp(requested,320,3840)); output.value=`${requested}px`; output.textContent=`${requested}px`; range.setAttribute('aria-valuetext',`${requested} pixels`);
+      };
+      const scheduleSize=() => { if (!resizePending) { resizePending=true; pageScope.frame(size); } };
+      frame.srcdoc=sourceDocument(); wrapper.classList.add('is-live'); wrapper.replaceChildren(frame); size();
+      pageScope.on(range,'input',() => { fitted=false; requested=Number(range.value); scheduleSize(); }); pageScope.on($('#fit-control'),'click',() => { fitted=true; size(); });
+      pageScope.on($('#theme-control'),'click',() => setTheme(root.dataset.theme==='dark'?'light':'dark')); pageScope.on($('#direction-control'),'click',() => setDirection(root.dir==='rtl'?'ltr':'rtl'));
+      pageScope.on($('#checks-control'),'click',() => { const child=frame.contentWindow; if (child.Claude) { child.document.getElementById('checks').scrollIntoView({behavior:Motion.reduced?'auto':'smooth'}); child.Claude.runTests(); } });
+      pageScope.on($('.skip'),'click',event => { event.preventDefault(); frame.contentWindow.Claude?.navigate('collection'); });
+      pageScope.on(window,'keydown',event => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase()==='k') { event.preventDefault(); frame.contentWindow.Claude?.openPalette(); } });
+      if ('ResizeObserver' in window) { const observer=new ResizeObserver(scheduleSize); observer.observe(controls); observer.observe(wrapper); pageScope.add(() => observer.disconnect()); } else pageScope.on(window,'resize',scheduleSize,{passive:true});
+      pageScope.on(frame,'load',() => { setTheme(root.dataset.theme,false); setDirection(root.dir || 'ltr',false); });
+    }
+  })();
+  </script>
+</body>
+</html>

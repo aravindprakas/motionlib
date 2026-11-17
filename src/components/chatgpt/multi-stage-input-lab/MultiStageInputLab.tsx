@@ -1,0 +1,52 @@
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Cloud, Loader2, WifiOff } from 'lucide-react';
+import { useInstrumentMotion } from '@/lib/chatgpt';
+
+export interface ProjectDraft { name: string; kind: 'personal' | 'team' | 'enterprise'; region: string; members: number; private: boolean }
+export interface MultiStageInputLabProps { draftKey?: string; initialDraft?: Partial<ProjectDraft>; validateName?: (name: string, signal: AbortSignal) => Promise<string | null>; onSubmit: (draft: ProjectDraft, signal: AbortSignal) => Promise<void>; onDraftChange?: (draft: ProjectDraft) => void }
+const defaultDraft: ProjectDraft = { name: '', kind: 'team', region: 'Europe', members: 5, private: true };
+const isDraft = (value: unknown): value is ProjectDraft => { if (!value || typeof value !== 'object') return false; const item = value as Record<string, unknown>; return typeof item.name === 'string' && ['personal', 'team', 'enterprise'].includes(String(item.kind)) && typeof item.region === 'string' && typeof item.members === 'number' && Number.isFinite(item.members) && typeof item.private === 'boolean'; };
+
+export function MultiStageInputLab({ draftKey = 'cg-project-draft-v1', initialDraft, validateName, onSubmit, onDraftChange }: MultiStageInputLabProps) {
+  const [draft, setDraft] = useState<ProjectDraft>(() => { try { const saved: unknown = JSON.parse(localStorage.getItem(draftKey) ?? 'null'); if (isDraft(saved)) return saved; } catch { /* Use a fresh draft when storage is unavailable. */ } return { ...defaultDraft, ...initialDraft }; });
+  const [step, setStep] = useState(0);
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(true);
+  const [storageError, setStorageError] = useState(false);
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
+  const [complete, setComplete] = useState(false);
+  const abort = useRef<AbortController | null>(null), lock = useRef(false), firstField = useRef<HTMLInputElement>(null), form = useRef<HTMLFormElement>(null), dirty = useRef(false);
+  const id = useId();
+  const focusStep = useCallback((node: HTMLDivElement | null) => { const target = node?.querySelector<HTMLElement>('input,select') ?? node?.querySelector<HTMLElement>('h3'); target?.focus(); }, []);
+  const success = useRef<HTMLDivElement>(null);
+  const { reduced, transition } = useInstrumentMotion();
+  const update = (patch: Partial<ProjectDraft>) => { abort.current?.abort(); lock.current = false; setPending(false); dirty.current = true; setSaved(false); setDraft(old => ({ ...old, ...patch })); setError(''); };
+  useEffect(() => { if (!dirty.current || complete) return; const timer = window.setTimeout(() => { try { localStorage.setItem(draftKey, JSON.stringify(draft)); setSaved(true); setStorageError(false); dirty.current = false; } catch { setStorageError(true); } }, 450); return () => clearTimeout(timer); }, [draft, draftKey, complete]);
+  useEffect(() => { onDraftChange?.(draft); }, [draft, onDraftChange]);
+  useEffect(() => { const unload = (e: BeforeUnloadEvent) => { if (dirty.current) { e.preventDefault(); e.returnValue = ''; } }; const status = () => setOnline(navigator.onLine); window.addEventListener('beforeunload', unload); window.addEventListener('online', status); window.addEventListener('offline', status); return () => { abort.current?.abort(); window.removeEventListener('beforeunload', unload); window.removeEventListener('online', status); window.removeEventListener('offline', status); }; }, []);
+  useEffect(() => { if (complete) success.current?.querySelector<HTMLElement>('h3')?.focus(); }, [complete]);
+  const next = async () => {
+    if (lock.current || complete) return;
+    setError('');
+    if (step === 0 && draft.name.trim().length < 3) { setError('Give your project a name with at least 3 characters.'); firstField.current?.focus(); return; }
+    if (step === 1 && draft.kind !== 'personal' && (!Number.isInteger(draft.members) || draft.members < 2 || draft.members > 5000)) { setError('Choose between 2 and 5,000 collaborators.'); return; }
+    const controller = new AbortController(); abort.current = controller; lock.current = true; setPending(true);
+    try {
+      if (step === 0 && validateName) { const result = await validateName(draft.name.trim(), controller.signal); if (controller.signal.aborted) return; if (result) { setError(result); firstField.current?.focus(); return; } }
+      if (step === 2) { if (!online) { setError('You’re offline. Your draft is here; reconnect to create your project.'); return; } await onSubmit({ ...draft, name: draft.name.trim(), members: draft.kind === 'personal' ? 1 : draft.members }, controller.signal); if (!controller.signal.aborted) { dirty.current = false; try { localStorage.removeItem(draftKey); } catch { /* Completion is independent of storage. */ } setComplete(true); } }
+      else if (!controller.signal.aborted) setStep(step + 1);
+    } catch (cause) { if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Something went wrong. Your draft is saved; try again.'); }
+    finally { if (abort.current === controller && !controller.signal.aborted) { lock.current = false; setPending(false); } }
+  };
+  return <section className="cg-input-lab" aria-label="Multi-stage input lab"><div className="cg-between"><span className="cg-eyebrow">BUILD SOMETHING THAT MATTERS</span><span className="cg-save-status" role="status">{online ? <Cloud size={14}/> : <WifiOff size={14}/>} {storageError ? 'Draft in this session only' : complete ? 'Project created' : saved ? 'Draft saved on this device' : 'Saving draft…'}</span></div>
+    {complete ? <div ref={success} className="cg-form-success" role="status"><CheckCircle2 size={46}/><h3 tabIndex={-1}>{draft.name}<br/><em>has a place to begin.</em></h3><p>Your {draft.kind} workspace is ready in {draft.region}.</p><button className="cg-button" onClick={() => { setComplete(false); setStep(0); update({ ...defaultDraft }); }}>Create another project<ArrowRight size={15}/></button></div> : <div className="cg-form-layout"><aside className="cg-form-steps">{['The idea', 'The people', 'The beginning'].map((title, index) => <button key={title} className={step === index ? 'is-current' : step > index ? 'is-complete' : ''} disabled={index > step || pending} aria-current={step === index ? 'step' : undefined} onClick={() => { setStep(index); setError(''); }}><span>{step > index ? <Check size={15}/> : `0${index + 1}`}</span><div>{title}<small>{index === 0 && step > index ? draft.name : index === 1 && step > index ? `${draft.kind === 'personal' ? 'Just you' : `${draft.members} collaborators`} · ${draft.region}` : index === 0 ? 'Give it a name' : index === 1 ? 'Make room for your team' : 'Review and create'}</small></div></button>)}<p>Every decision becomes<br/>part of the next.</p></aside>
+      <form ref={form} className="cg-evolving-form" onSubmit={e => { e.preventDefault(); void next(); }} noValidate aria-busy={pending}>
+        <AnimatePresence mode="wait" initial={false}><motion.div ref={focusStep} key={step} initial={reduced ? false : { opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .98 }} transition={transition}>
+          <span className="cg-eyebrow">DECISION 0{step + 1} / 03</span><h3 tabIndex={-1}>{step === 0 ? 'Start with an idea.' : step === 1 ? 'Good things take people.' : 'Ready when you are.'}</h3><p>{step === 0 ? 'A name gives your project a little gravity.' : step === 1 ? 'Shape the space around the way you work.' : 'A final look before your idea becomes a workspace.'}</p>
+          {step === 0 ? <><label htmlFor={`${id}-name`}>Project name</label><input ref={firstField} id={`${id}-name`} value={draft.name} maxLength={100} autoComplete="off" placeholder="e.g. The next good thing" onChange={e => update({ name: e.target.value })} aria-invalid={!!error} aria-describedby={`${id}-error ${id}-hint`} required/><small id={`${id}-hint`}>3–100 characters. You can change this later.</small><fieldset><legend>How will you use it?</legend><div className="cg-plan-options">{(['personal', 'team', 'enterprise'] as const).map(kind => <label key={kind}><input type="radio" name={`${id}-kind`} checked={draft.kind === kind} onChange={() => update({ kind })}/><span>{kind}<small>{kind === 'personal' ? 'Space for your own ideas' : kind === 'team' ? 'Better, together' : 'Across your organization'}</small></span></label>)}</div></fieldset></> : step === 1 ? <><label htmlFor={`${id}-region`}>Your data’s home</label><select id={`${id}-region`} value={draft.region} onChange={e => update({ region: e.target.value })}>{['Europe', 'North America', 'Asia Pacific'].map(region => <option key={region}>{region}</option>)}</select>{draft.kind !== 'personal' && <><label htmlFor={`${id}-members`}>Collaborators</label><input id={`${id}-members`} type="number" min={2} max={5000} value={draft.members} onChange={e => update({ members: Number(e.target.value) })} aria-invalid={!!error} aria-describedby={`${id}-error`}/></>}{draft.kind === 'enterprise' && <p className="cg-notice">Enterprise spaces include organization-wide access controls.</p>}<label className="cg-checkbox"><input type="checkbox" checked={draft.private} onChange={e => update({ private: e.target.checked })}/>Keep this workspace private</label></> : <dl className="cg-review"><div><dt>Project</dt><dd>{draft.name}</dd></div><div><dt>Space</dt><dd>{draft.kind}</dd></div><div><dt>People</dt><dd>{draft.kind === 'personal' ? 1 : draft.members}</dd></div><div><dt>Region</dt><dd>{draft.region}</dd></div><div><dt>Access</dt><dd>{draft.private ? 'Invite only' : 'Anyone with a link'}</dd></div></dl>}
+        </motion.div></AnimatePresence><p id={`${id}-error`} className="cg-form-error" role="alert">{error}</p><div className="cg-form-actions"><button type="button" className="cg-text-button" disabled={step === 0 || pending} onClick={() => { setStep(step - 1); setError(''); }}><ArrowLeft size={14}/>Back</button><button className="cg-button cg-primary" data-primary disabled={pending}>{pending ? <Loader2 size={15} className="cg-spin"/> : null}{pending ? 'One moment…' : step === 2 ? 'Create project' : 'Continue'}{!pending && <ArrowRight size={15}/>}</button></div>
+      </form></div>}
+  </section>;
+}

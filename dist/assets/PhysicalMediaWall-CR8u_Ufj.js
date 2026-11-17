@@ -1,0 +1,43 @@
+const e=`import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, FileText, GripHorizontal, Maximize2, Music2, Play } from 'lucide-react';
+import { FrameArt, InstrumentDialog, SurfaceState, clamp, type AsyncSurfaceProps } from '@/lib/chatgpt';
+
+export interface WallMedia { id: string; title: string; type: 'image' | 'video' | 'audio' | 'document' | 'art'; src?: string; poster?: string; text?: string; aspectRatio?: number; caption: string; seed?: number }
+export interface PhysicalMediaWallProps extends AsyncSurfaceProps { items: WallMedia[]; onReorder?: (ids: string[]) => void; pageSize?: number }
+
+function MediaPreview({ item, full = false }: { item: WallMedia; full?: boolean }) {
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [item.src]);
+  if (broken) return <div className="cg-media-fallback"><FileText size={32}/><span>This file is unavailable.</span>{full && <button className="cg-text-button" onClick={() => setBroken(false)}>Try again</button>}</div>;
+  if (item.type === 'image' && item.src) return <img src={item.src} alt={item.title} loading={full ? 'eager' : 'lazy'} decoding="async" draggable={false} onError={() => setBroken(true)}/>;
+  if (item.type === 'video') return full && item.src ? <video src={item.src} poster={item.poster} controls playsInline preload="metadata" onError={() => setBroken(true)} aria-label={item.title}/> : <div className="cg-video-preview">{item.poster ? <img src={item.poster} alt="" loading="lazy" onError={() => setBroken(true)}/> : <FrameArt seed={item.seed}/>}<Play size={28}/></div>;
+  if (item.type === 'audio') return <div className="cg-audio-preview"><Music2 size={22}/><div className="cg-waveform" aria-hidden="true">{Array.from({ length: 32 }, (_, index) => <i key={index} style={{ height: \`\${12 + (index * 17 % 47)}px\` }}/>)}</div>{full && item.src ? <audio controls src={item.src} preload="metadata" onError={() => setBroken(true)} aria-label={item.title}/> : <span>{full ? 'Audio unavailable' : 'A small moment, recorded.'}</span>}</div>;
+  if (item.type === 'document') return <div className="cg-document-preview"><FileText size={20}/><span className="cg-eyebrow">STUDIO NOTES / 001</span><h4>{item.title}</h4>{full ? <pre>{item.text ?? 'Document content is unavailable.'}</pre> : <><p>{item.text?.slice(0, 140) ?? 'Open to read the document.'}</p><i/><i/><i/></>}</div>;
+  return <FrameArt seed={item.seed}/>;
+}
+
+export function PhysicalMediaWall({ items, onReorder, pageSize = 18, state, onRetry }: PhysicalMediaWallProps) {
+  const [order, setOrder] = useState<string[]>(() => items.map(item => item.id));
+  const [focused, setFocused] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [announcement, setAnnouncement] = useState('');
+  const dragging = useRef<string | null>(null), swipe = useRef<number | null>(null);
+  const ordered = [...order.filter(id => items.some(item => item.id === id)), ...items.filter(item => !order.includes(item.id)).map(item => item.id)].map(id => items.find(item => item.id === id)!);
+  const size = clamp(pageSize, 1, 40), currentPage = Math.min(page, Math.max(0, Math.ceil(ordered.length / size) - 1));
+  const current = ordered.find(item => item.id === open), index = ordered.findIndex(item => item.id === open);
+  const reorder = (source: string, target: string) => { if (source === target) return; const ids = ordered.map(item => item.id); const from = ids.indexOf(source), to = ids.indexOf(target); if (from < 0 || to < 0) return; ids.splice(from, 1); ids.splice(to, 0, source); setOrder(ids); onReorder?.(ids); setAnnouncement(\`Moved \${items.find(item => item.id === source)?.title} to position \${to + 1}.\`); };
+  const move = (direction: number) => { const i = ordered.findIndex(item => item.id === focused); if (ordered[i + direction] && focused) reorder(focused, ordered[i + direction].id); };
+  const next = (direction: number) => { if (ordered.length) setOpen(ordered[(index + direction + ordered.length) % ordered.length].id); };
+  return <SurfaceState state={state === 'loading' || state === 'error' ? state : items.length ? state : 'empty'} onRetry={onRetry}><section className="cg-media-wall" aria-label="Physical media wall" onKeyDown={e => { if (!open || e.target instanceof HTMLElement && e.target.closest('audio,video')) return; if (e.key === 'ArrowRight') { e.preventDefault(); next(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); next(-1); } }}><div className="cg-between"><div><span className="cg-eyebrow">COLLECTED, NOT CONTAINED</span><h3>The studio wall.</h3></div><span className="cg-tag">{items.length} objects</span></div>
+    <div className="cg-wall-controls"><span>{focused ? \`Arrange: \${items.find(item => item.id === focused)?.title ?? ''}\` : 'Select an object to arrange it.'}</span><div className="cg-inline"><button className="cg-icon-button" aria-label="Move selected object earlier" disabled={!focused || ordered[0]?.id === focused} onClick={() => move(-1)}><ArrowLeft size={15}/></button><GripHorizontal size={15}/><button className="cg-icon-button" aria-label="Move selected object later" disabled={!focused || ordered[ordered.length - 1]?.id === focused} onClick={() => move(1)}><ArrowRight size={15}/></button><button className="cg-icon-button" aria-label="Open selected object fullscreen" disabled={!focused} onClick={() => setOpen(focused)}><Maximize2 size={15}/></button></div></div>
+    <div className={\`cg-wall-grid \${focused ? 'has-focus' : ''}\`}>{ordered.slice(currentPage * size, (currentPage + 1) * size).map((item, i) => <article key={item.id} className={\`cg-wall-object \${focused === item.id ? 'is-focused' : ''}\`} draggable onDragStart={e => { dragging.current = item.id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', item.id); setFocused(item.id); }} onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }} onDrop={e => { e.preventDefault(); if (dragging.current) reorder(dragging.current, item.id); dragging.current = null; }} onDragEnd={() => { dragging.current = null; }} style={{ '--object-ratio': clamp(item.aspectRatio ?? 1.4, .6, 2.6), '--object-tilt': \`\${i % 3 === 0 ? -1.5 : i % 3 === 1 ? 1 : -.5}deg\` } as React.CSSProperties}>
+      <button className="cg-wall-trigger" aria-pressed={focused === item.id} onFocus={() => setFocused(item.id)} onClick={() => setFocused(item.id)} onDoubleClick={() => setOpen(item.id)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setOpen(item.id); } }}><div className="cg-wall-preview"><MediaPreview item={item}/><span className="cg-wall-number">{String(currentPage * size + i + 1).padStart(2, '0')}</span></div><div className="cg-wall-label"><strong>{item.title}</strong><small>{item.caption}</small><span>{item.type}</span></div></button>
+    </article>)}</div>
+    <div className="cg-footnote"><span>Select to arrange · Double click or Enter to open</span>{ordered.length > size && <div className="cg-inline"><button className="cg-text-button" disabled={!currentPage} onClick={() => setPage(currentPage - 1)}>Previous</button><span>{currentPage + 1} / {Math.ceil(ordered.length / size)}</span><button className="cg-text-button" disabled={(currentPage + 1) * size >= ordered.length} onClick={() => setPage(currentPage + 1)}>Next →</button></div>}</div><span className="cg-sr-only" role="status">{announcement}</span>
+    <InstrumentDialog open={!!current} title={current?.title ?? 'Media viewer'} onClose={() => setOpen(null)} className="cg-media-dialog"><div className="cg-media-full" onPointerDown={e => { if (e.pointerType === 'touch') swipe.current = e.clientX; }} onPointerUp={e => { if (e.target instanceof HTMLElement && e.target.closest('audio,video')) return; if (swipe.current !== null && Math.abs(e.clientX - swipe.current) > 60) next(e.clientX < swipe.current ? 1 : -1); swipe.current = null; }}>
+      {current && <MediaPreview key={current.id} item={current} full/>}<div className="cg-between"><button className="cg-icon-button" aria-label="Previous object" onClick={() => next(-1)}><ArrowLeft size={18}/></button><p aria-live="polite">{current?.caption} · {index + 1} / {ordered.length}</p><button className="cg-icon-button" aria-label="Next object" onClick={() => next(1)}><ArrowRight size={18}/></button></div>
+    </div></InstrumentDialog>
+  </section></SurfaceState>;
+}
+`;export{e as default};

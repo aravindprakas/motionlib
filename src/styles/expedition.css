@@ -1,0 +1,3237 @@
+/* ==========================================================================
+   EXPEDITION — the archive theme
+   --------------------------------------------------------------------------
+   Scoped to `.exp`, the same containment pattern `.ss-theme` and `.shell-theme`
+   use in styles/index.css: a set that is a deliberate departure from the house
+   brutalist tokens carries its own palette in its own subtree so neither has to
+   lie about itself. Nothing here leaks onto the rest of the library.
+
+   Written as one stylesheet rather than ten, because the ten components in this
+   group are one *publication*: they share a paper, a rule weight, a label
+   style and a set of curves, and the fastest way to make ten components stop
+   feeling like one product is to let each own a private copy of the paper.
+
+   Everything is a custom property. A component reads tokens; it never hardcodes
+   a colour, a duration or a curve.
+   ========================================================================== */
+
+.exp {
+  /* ------------------------------------------------------------- colour --
+     Aged ivory ground, charcoal ink, mineral grey for anything secondary.
+     Colour is not decoration here: it is classification. Archival red marks
+     the live action and the selected state, bronze marks classification,
+     forest marks availability, clay marks rarity. Nothing else is coloured. */
+  --exp-background: #e7e2d6;
+  --exp-surface: #f1ede4;
+  --exp-surface-raised: #f8f5ef;
+  --exp-surface-sunken: #ded8ca;
+  --exp-text: #1b1a18;
+  --exp-text-muted: #6a665e;
+  --exp-text-faint: #97928a;
+  --exp-border: rgba(27, 26, 24, 0.16);
+  --exp-border-strong: rgba(27, 26, 24, 0.42);
+  --exp-accent: #8f2f1d;
+  --exp-accent-soft: rgba(143, 47, 29, 0.1);
+  --exp-bronze: #7a6234;
+  --exp-clay: #a4623f;
+  --exp-success: #2f4034;
+  --exp-warning: #8a6a1f;
+  --exp-error: #8f2f1d;
+
+  /* --------------------------------------------------------- typography --
+     Three voices, one job each. Serif is the catalogue title. Sans is every
+     control and every sentence a person reads. Mono is metadata — an
+     accession number, a stitch count, a stratum — and never a paragraph. */
+  --exp-font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --exp-font-ui: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --exp-font-meta: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --exp-display-size: clamp(2.6rem, 1.1rem + 6vw, 5.4rem);
+  --exp-display-leading: 0.94;
+  --exp-title-size: clamp(1.7rem, 1.1rem + 2.4vw, 2.9rem);
+  --exp-title-leading: 1.04;
+  --exp-heading-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.35rem);
+  --exp-body-size: clamp(0.95rem, 0.92rem + 0.14vw, 1.02rem);
+  --exp-body-leading: 1.62;
+  --exp-caption-size: 0.83rem;
+  --exp-metadata-size: 0.7rem;
+  --exp-label-size: 0.62rem;
+  --exp-label-tracking: 0.26em;
+  --exp-meta-tracking: 0.14em;
+
+  /* ------------------------------------------------------------ spacing --
+     4px base, doubling with two half-steps where the doubling is too coarse. */
+  --exp-1: 0.25rem;
+  --exp-2: 0.5rem;
+  --exp-3: 0.75rem;
+  --exp-4: 1rem;
+  --exp-5: 1.5rem;
+  --exp-6: 2rem;
+  --exp-7: 3rem;
+  --exp-8: 4rem;
+  --exp-9: 6rem;
+
+  /* ------------------------------------------------------------- layout --
+     Gutters are declared once per band below and every component reads them,
+     so a set of ten components cannot disagree about the page edge. */
+  --exp-page: 1440px;
+  --exp-reading: 64ch;
+  --exp-gap: var(--exp-4);
+  --exp-gutter: var(--exp-4);
+  --exp-hairline: 1px;
+
+  /* ------------------------------------------------------------- motion --
+     Four durations, four curves, named after the physical thing each models.
+     Mirrored exactly in @/lib/expedition (EXP_MOTION / EXP_DUR) so the JS and
+     the CSS halves of a transition can never drift. */
+  --exp-fast: 120ms;
+  --exp-standard: 260ms;
+  --exp-slow: 460ms;
+  --exp-cinematic: 720ms;
+  --exp-ease-paper: cubic-bezier(0.32, 0.72, 0, 1);
+  --exp-ease-precise: cubic-bezier(0.2, 0, 0, 1);
+  --exp-ease-focus: cubic-bezier(0.65, 0, 0.35, 1);
+  --exp-ease-survey: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  background: var(--exp-background);
+  color: var(--exp-text);
+  font-family: var(--exp-font-ui);
+  font-size: var(--exp-body-size);
+  line-height: var(--exp-body-leading);
+  -webkit-font-smoothing: antialiased;
+  /* The paper. Two near-invisible gratings, no image request, no noise PNG. */
+  background-image:
+    repeating-linear-gradient(0deg, rgba(27, 26, 24, 0.022) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(27, 26, 24, 0.018) 0 1px, transparent 1px 4px);
+}
+
+/* Tablet and desktop gutters. The only viewport queries in the group: page
+   edge is genuinely a property of the page, while every *component* sizes
+   itself from its own box via useSizeBand. */
+@media (min-width: 600px) {
+  .exp {
+    --exp-gutter: var(--exp-6);
+    --exp-gap: var(--exp-5);
+  }
+}
+@media (min-width: 1024px) {
+  .exp {
+    --exp-gutter: var(--exp-7);
+  }
+}
+@media (min-width: 1920px) {
+  .exp {
+    --exp-page: 1680px;
+  }
+}
+
+/* ------------------------------------------------------------- typography */
+
+.exp-display {
+  font-family: var(--exp-font-display);
+  font-size: var(--exp-display-size);
+  line-height: var(--exp-display-leading);
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.exp-title {
+  font-family: var(--exp-font-display);
+  font-size: var(--exp-title-size);
+  line-height: var(--exp-title-leading);
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.exp-heading {
+  font-family: var(--exp-font-ui);
+  font-size: var(--exp-heading-size);
+  line-height: 1.24;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+
+.exp-body {
+  font-size: var(--exp-body-size);
+  line-height: var(--exp-body-leading);
+  margin: 0;
+  max-width: var(--exp-reading);
+}
+
+.exp-caption {
+  font-size: var(--exp-caption-size);
+  line-height: 1.5;
+  color: var(--exp-text-muted);
+  margin: 0;
+}
+
+/* Metadata: the archive's own voice. Tabular figures so a column of stitch
+   counts lines up without a table. */
+.exp-meta {
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-metadata-size);
+  letter-spacing: var(--exp-meta-tracking);
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+  color: var(--exp-text-muted);
+}
+
+.exp-label {
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  color: var(--exp-text-faint);
+  display: block;
+}
+
+.exp-label--ink {
+  color: var(--exp-text-muted);
+}
+
+/* ------------------------------------------------------------- primitives */
+
+/* A sheet of the archive's paper. Inset rule, not a shadow — this set has no
+   elevation model, it has stacked paper. */
+.exp-panel {
+  background: var(--exp-surface);
+  border: var(--exp-hairline) solid var(--exp-border);
+  position: relative;
+}
+
+.exp-panel--raised {
+  background: var(--exp-surface-raised);
+  border-color: var(--exp-border-strong);
+}
+
+.exp-panel--sunken {
+  background: var(--exp-surface-sunken);
+}
+
+.exp-rule {
+  border: 0;
+  border-top: var(--exp-hairline) solid var(--exp-border);
+  margin: 0;
+}
+
+/* The archival label: a stamped block of key/value metadata. */
+.exp-stamp {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--exp-1) var(--exp-4);
+  align-items: baseline;
+}
+
+.exp-stamp dt {
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  color: var(--exp-text-faint);
+  white-space: nowrap;
+}
+
+.exp-stamp dd {
+  margin: 0;
+  font-size: var(--exp-caption-size);
+  color: var(--exp-text);
+}
+
+/* Classification chip. Bronze by default; the modifier colours carry meaning
+   and are never applied for variety. */
+.exp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--exp-2);
+  padding: 0.24em 0.6em;
+  border: var(--exp-hairline) solid currentColor;
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  color: var(--exp-bronze);
+  white-space: nowrap;
+}
+
+.exp-chip--rarity {
+  color: var(--exp-clay);
+}
+.exp-chip--available {
+  color: var(--exp-success);
+}
+.exp-chip--archived {
+  color: var(--exp-text-faint);
+}
+.exp-chip--live {
+  color: var(--exp-accent);
+}
+
+/* ---------------------------------------------------------------- actions */
+
+.exp-action {
+  --exp-action-fg: var(--exp-text);
+  --exp-action-bg: transparent;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--exp-3);
+  min-height: 44px;
+  padding: 0 var(--exp-5);
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-action-bg);
+  color: var(--exp-action-fg);
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-metadata-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--exp-fast) var(--exp-ease-precise),
+    color var(--exp-fast) var(--exp-ease-precise),
+    border-color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-action:hover:not(:disabled) {
+  --exp-action-bg: rgba(27, 26, 24, 0.05);
+}
+
+.exp-action--primary {
+  --exp-action-fg: var(--exp-surface-raised);
+  --exp-action-bg: var(--exp-accent);
+  border-color: var(--exp-accent);
+  font-weight: 700;
+}
+
+.exp-action--primary:hover:not(:disabled) {
+  --exp-action-bg: #7a2718;
+}
+
+.exp-action--quiet {
+  border-color: transparent;
+  min-height: 40px;
+  padding: 0 var(--exp-3);
+  color: var(--exp-text-muted);
+}
+
+.exp-action:disabled,
+.exp-action[aria-disabled='true'] {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* One focus treatment for the whole group: a hard offset rule in archival red.
+   Never removed, never conditioned on pointer type. */
+.exp :focus-visible {
+  outline: 2px solid var(--exp-accent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ plate */
+
+.exp-plate {
+  position: relative;
+  overflow: hidden;
+  color: rgba(27, 26, 24, 0.45);
+  isolation: isolate;
+  /* The plate is a leaf: nothing inside it can affect layout outside it. */
+  contain: layout paint style;
+}
+
+.exp-plate__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.exp-plate__weave,
+.exp-plate__light,
+.exp-plate__marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.exp-plate__marks {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.exp-plate__stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.exp-plate__carrier {
+  position: absolute;
+  height: 84%;
+  width: auto;
+}
+
+.exp-plate__art {
+  width: calc(58% * var(--zoom, 1));
+  height: auto;
+  position: relative;
+}
+
+.exp-plate[data-mode='carrier'] .exp-plate__art {
+  width: calc(30% * var(--zoom, 1));
+  transform: translateY(-6%);
+}
+
+.exp-plate__id {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-family: var(--exp-font-meta);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: rgba(27, 26, 24, 0.5);
+  mix-blend-mode: multiply;
+}
+
+/* ------------------------------------------------------------------ shell */
+
+.exp-section {
+  width: 100%;
+  max-width: var(--exp-page);
+  margin-inline: auto;
+  padding-inline: var(--exp-gutter);
+}
+
+/* Screen-reader-only, house implementation so the group never depends on a
+   utility framework being present. */
+.exp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -------------------------------------------------------- reduced motion --
+   Functionality is never carried by an animation in this group, so switching
+   every transition to effectively instant is safe and total. Declared once,
+   at the theme root, instead of in ten components. */
+@media (prefers-reduced-motion: reduce) {
+  .exp *,
+  .exp *::before,
+  .exp *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   01 — EXPEDITION OPENING
+   ========================================================================== */
+
+.exp-open {
+  display: block;
+  padding-block: var(--exp-7) var(--exp-8);
+  container-type: inline-size;
+}
+
+.exp-open__grid {
+  display: grid;
+  gap: var(--exp-6) var(--exp-7);
+  grid-template-areas:
+    'marker'
+    'figure'
+    'record'
+    'index';
+}
+
+.exp-open[data-band='wide'] .exp-open__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  grid-template-areas:
+    'marker marker'
+    'record figure'
+    'index index';
+  align-items: start;
+}
+
+.exp-open[data-band='regular'] .exp-open__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.78fr);
+  grid-template-areas:
+    'marker marker'
+    'record figure'
+    'index index';
+  gap: var(--exp-5);
+  align-items: start;
+}
+
+/* --- marker */
+
+.exp-open__marker {
+  grid-area: marker;
+  display: flex;
+  align-items: center;
+  gap: var(--exp-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-open__markerRule {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 1px;
+  background: var(--exp-border-strong);
+}
+
+/* --- figure */
+
+.exp-open__figure {
+  grid-area: figure;
+  margin: 0;
+  display: grid;
+  gap: var(--exp-3);
+}
+
+.exp-open__plateWrap {
+  position: relative;
+  display: flex;
+  gap: var(--exp-3);
+}
+
+.exp-open__plate {
+  flex: 1 1 auto;
+  animation: exp-plate-in var(--exp-cinematic) var(--exp-ease-focus) both;
+}
+
+@keyframes exp-plate-in {
+  from {
+    opacity: 0;
+    transform: scale(1.018);
+  }
+}
+
+/* Depth scale: five strata, the artifact's own marked. Reads as an instrument
+   scale beside the plate rather than as decoration, and it is the same five
+   steps the survey map uses. */
+.exp-open__depth {
+  flex: 0 0 auto;
+  width: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 4px;
+}
+
+.exp-open__depthMark {
+  display: block;
+  height: 1px;
+  width: 6px;
+  background: var(--exp-border-strong);
+  transition: width var(--exp-standard) var(--exp-ease-precise);
+}
+
+.exp-open__depthMark[data-active] {
+  width: 10px;
+  height: 2px;
+  background: var(--exp-accent);
+}
+
+.exp-open__figcap {
+  display: block;
+}
+
+/* --- record */
+
+.exp-open__record {
+  grid-area: record;
+  display: grid;
+  gap: var(--exp-4);
+  align-content: start;
+}
+
+.exp-open__title {
+  margin-block: var(--exp-1) var(--exp-2);
+}
+
+.exp-open__stamp {
+  padding-block: var(--exp-4);
+  border-block: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-open__cta {
+  justify-self: start;
+}
+
+.exp-open__narrative {
+  color: var(--exp-text);
+}
+
+.exp-open__brief {
+  max-width: var(--exp-reading);
+}
+
+/* --- index strip */
+
+.exp-open__index {
+  grid-area: index;
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+  padding-top: var(--exp-4);
+}
+
+.exp-open__indexList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 46%;
+  gap: var(--exp-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  padding-bottom: var(--exp-2);
+  -webkit-overflow-scrolling: touch;
+}
+
+.exp-open[data-band='regular'] .exp-open__indexList {
+  grid-auto-columns: 25%;
+}
+
+.exp-open[data-band='wide'] .exp-open__indexList {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.exp-open__indexItem {
+  scroll-snap-align: start;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: var(--exp-2);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.exp-open__indexNo {
+  color: var(--exp-text-faint);
+}
+
+.exp-open__indexPlate {
+  transition:
+    transform var(--exp-standard) var(--exp-ease-paper),
+    outline-color var(--exp-fast) var(--exp-ease-precise);
+  outline: 1px solid transparent;
+  outline-offset: 0;
+}
+
+.exp-open__indexItem:hover .exp-open__indexPlate {
+  transform: translateY(-3px);
+}
+
+.exp-open__indexItem[aria-pressed='true'] .exp-open__indexPlate {
+  outline: 2px solid var(--exp-accent);
+}
+
+.exp-open__indexName {
+  font-size: var(--exp-caption-size);
+  line-height: 1.3;
+}
+
+.exp-open__indexItem[aria-pressed='true'] .exp-open__indexName {
+  color: var(--exp-accent);
+}
+
+.exp-open__indexAcc {
+  font-size: 0.6rem;
+}
+
+/* ==========================================================================
+   02 — ARTIFACT CATALOG
+   ========================================================================== */
+
+.exp-cat {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-cat__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+  margin-bottom: var(--exp-5);
+}
+
+.exp-cat__count {
+  margin: var(--exp-1) 0 0;
+}
+
+.exp-cat__modes {
+  display: flex;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-cat__mode {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-left: var(--exp-hairline) solid var(--exp-border-strong);
+  min-height: 44px;
+  padding-inline: var(--exp-4);
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  color: var(--exp-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--exp-fast) var(--exp-ease-precise),
+    color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-cat__mode:first-child {
+  border-left: 0;
+}
+
+.exp-cat__mode:hover {
+  background: rgba(27, 26, 24, 0.05);
+}
+
+.exp-cat__mode[aria-checked='true'] {
+  background: var(--exp-text);
+  color: var(--exp-surface-raised);
+}
+
+.exp-cat__empty {
+  padding-block: var(--exp-8);
+  text-align: center;
+}
+
+/* --- archive wall */
+
+.exp-cat__wall {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: var(--exp-6) var(--exp-5);
+}
+
+.exp-cat[data-band='compact'] .exp-cat__wall {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: var(--exp-5) var(--exp-4);
+}
+
+/* The recomposition ladder. Capped at six steps in JS so a long catalogue does
+   not turn into a two-second cascade. */
+.exp-cat__cell,
+.exp-cat__index > li {
+  animation: exp-settle var(--exp-slow) var(--exp-ease-paper) both;
+  animation-delay: calc(var(--i, 0) * 34ms);
+}
+
+@keyframes exp-settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.exp-cat__card {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: var(--exp-2);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.exp-cat__cardPlate {
+  transition: transform var(--exp-standard) var(--exp-ease-paper);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  margin-bottom: var(--exp-2);
+}
+
+.exp-cat__card:hover .exp-cat__cardPlate {
+  transform: translateY(-4px);
+}
+
+.exp-cat__card[aria-pressed='true'] .exp-cat__cardPlate {
+  outline-color: var(--exp-accent);
+}
+
+.exp-cat__cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--exp-3);
+  padding-bottom: var(--exp-2);
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-cat__cardName {
+  font-size: 1rem;
+}
+
+.exp-cat__card[aria-pressed='true'] .exp-cat__cardName {
+  color: var(--exp-accent);
+}
+
+.exp-cat__cardMeta {
+  font-size: 0.78rem;
+}
+
+.exp-cat__cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--exp-3);
+  margin-top: var(--exp-1);
+}
+
+/* --- specimen index */
+
+.exp-cat__indexHead,
+.exp-cat__row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.6fr 1fr 0.8fr 0.7fr 0.8fr;
+  gap: var(--exp-4);
+  align-items: center;
+}
+
+.exp-cat__indexHead {
+  padding: 0 var(--exp-3) var(--exp-2);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-cat[data-band='compact'] .exp-cat__indexHead {
+  display: none;
+}
+
+.exp-cat__index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.exp-cat__row {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--exp-2) var(--exp-3);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-cat__row:hover {
+  background: rgba(27, 26, 24, 0.04);
+}
+
+.exp-cat__row[aria-pressed='true'] {
+  background: var(--exp-accent-soft);
+  box-shadow: inset 2px 0 0 var(--exp-accent);
+}
+
+.exp-cat__rowAcc {
+  display: flex;
+  align-items: center;
+  gap: var(--exp-3);
+}
+
+.exp-cat__rowPlate {
+  width: 30px;
+  flex: 0 0 auto;
+}
+
+.exp-cat__rowName {
+  font-size: 0.95rem;
+}
+
+.exp-cat__rowCell--faint {
+  color: var(--exp-text-faint);
+}
+
+/* Compact: the six-column index becomes two lines with the columns that do not
+   survive dropped, rather than a table scrolled sideways. */
+.exp-cat[data-band='compact'] .exp-cat__row {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'acc name status'
+    'acc cx cx';
+  gap: var(--exp-1) var(--exp-3);
+  padding-block: var(--exp-3);
+}
+
+.exp-cat[data-band='compact'] .exp-cat__rowAcc {
+  grid-area: acc;
+}
+.exp-cat[data-band='compact'] .exp-cat__rowName {
+  grid-area: name;
+}
+.exp-cat[data-band='compact'] .exp-cat__rowCell:nth-of-type(3),
+.exp-cat[data-band='compact'] .exp-cat__rowCell:nth-of-type(5) {
+  display: none;
+}
+.exp-cat[data-band='compact'] .exp-cat__rowCell:nth-of-type(4) {
+  grid-area: cx;
+}
+.exp-cat[data-band='compact'] .exp-cat__rowCell:nth-of-type(6) {
+  grid-area: status;
+  text-align: right;
+}
+
+/* --- detail */
+
+.exp-cat__detail {
+  display: grid;
+  gap: var(--exp-5);
+  grid-template-areas:
+    'plate'
+    'record'
+    'rail';
+}
+
+.exp-cat[data-band='regular'] .exp-cat__detail {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'plate record'
+    'rail rail';
+  align-items: start;
+}
+
+.exp-cat[data-band='wide'] .exp-cat__detail {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 96px;
+  grid-template-areas: 'plate record rail';
+  gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-cat__detailPlate {
+  grid-area: plate;
+  animation: exp-plate-in var(--exp-slow) var(--exp-ease-focus) both;
+}
+
+.exp-cat__detailRecord {
+  grid-area: record;
+  display: grid;
+  gap: var(--exp-4);
+  align-content: start;
+  justify-items: start;
+}
+
+.exp-cat__detailStamp {
+  padding-block: var(--exp-4);
+  border-block: var(--exp-hairline) solid var(--exp-border);
+  width: 100%;
+}
+
+.exp-cat__rail {
+  grid-area: rail;
+  display: flex;
+  gap: var(--exp-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: var(--exp-2);
+}
+
+.exp-cat[data-band='wide'] .exp-cat__rail {
+  flex-direction: column;
+  overflow-x: visible;
+  overflow-y: auto;
+  max-height: 560px;
+}
+
+.exp-cat__railItem {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  flex: 0 0 64px;
+  width: 64px;
+  display: grid;
+  gap: var(--exp-1);
+  justify-items: center;
+  cursor: pointer;
+  color: var(--exp-text-faint);
+  opacity: 0.62;
+  transition: opacity var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-cat__railItem:hover {
+  opacity: 1;
+}
+
+.exp-cat__railItem[aria-pressed='true'] {
+  opacity: 1;
+  color: var(--exp-accent);
+}
+
+.exp-cat__railItem[aria-pressed='true'] .exp-plate {
+  outline: 2px solid var(--exp-accent);
+  outline-offset: -2px;
+}
+
+/* --- complexity + skeleton */
+
+.exp-cat__cx {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.exp-cat__cxStep {
+  width: 10px;
+  height: 3px;
+  background: var(--exp-border);
+}
+
+.exp-cat__cxStep[data-on] {
+  background: var(--exp-bronze);
+}
+
+.exp-cat__skeleton {
+  aspect-ratio: 4 / 5;
+  background: var(--exp-surface-sunken);
+  animation: exp-pulse 1.4s var(--exp-ease-focus) infinite;
+}
+
+@keyframes exp-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ==========================================================================
+   03 — ARTIFACT SCANNER
+   ========================================================================== */
+
+.exp-scan {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-scan__grid {
+  display: grid;
+  gap: var(--exp-5);
+}
+
+.exp-scan[data-band='regular'] .exp-scan__grid,
+.exp-scan[data-band='wide'] .exp-scan__grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: var(--exp-6);
+  align-items: start;
+}
+
+/* --- window */
+
+.exp-scan__window {
+  position: relative;
+  overflow: hidden;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  aspect-ratio: 1 / 1;
+  background: var(--exp-surface-sunken);
+  /* The examination is a self-contained scene: nothing inside it can force
+     layout or paint outside its own box. */
+  contain: layout paint style;
+  touch-action: manipulation;
+}
+
+.exp-scan__surface {
+  position: absolute;
+  inset: 0;
+  transition: transform var(--exp-slow) var(--exp-ease-focus);
+  will-change: transform;
+}
+
+.exp-scan__surface .exp-plate {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- markers */
+
+.exp-scan__marker {
+  position: absolute;
+  width: var(--size, 44px);
+  height: var(--size, 44px);
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--exp-text);
+  display: grid;
+  place-items: center;
+  transition:
+    left var(--exp-slow) var(--exp-ease-focus),
+    top var(--exp-slow) var(--exp-ease-focus);
+}
+
+.exp-scan__markerRing {
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(27, 26, 24, 0.55);
+  border-radius: 50%;
+  transition:
+    border-color var(--exp-fast) var(--exp-ease-precise),
+    transform var(--exp-standard) var(--exp-ease-paper);
+}
+
+/* Cross-hair: two hairlines through the marker, so a region reads as a
+   surveyed point rather than as a dot on a photo. */
+.exp-scan__markerRing::before,
+.exp-scan__markerRing::after {
+  content: '';
+  position: absolute;
+  background: rgba(27, 26, 24, 0.42);
+}
+.exp-scan__markerRing::before {
+  left: 50%;
+  top: -8px;
+  bottom: -8px;
+  width: 1px;
+}
+.exp-scan__markerRing::after {
+  top: 50%;
+  left: -8px;
+  right: -8px;
+  height: 1px;
+}
+
+.exp-scan__marker:hover .exp-scan__markerRing {
+  transform: scale(1.06);
+  border-color: var(--exp-accent);
+}
+
+.exp-scan__marker[aria-pressed='true'] .exp-scan__markerRing {
+  border-color: var(--exp-accent);
+  border-width: 2px;
+}
+
+.exp-scan__markerLabel {
+  position: absolute;
+  top: calc(100% + 2px);
+  white-space: nowrap;
+  background: var(--exp-surface-raised);
+  border: var(--exp-hairline) solid var(--exp-border);
+  padding: 2px 6px;
+  color: var(--exp-text);
+  opacity: 0;
+  transition: opacity var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-scan__marker:hover .exp-scan__markerLabel,
+.exp-scan__marker:focus-visible .exp-scan__markerLabel,
+.exp-scan__marker[aria-pressed='true'] .exp-scan__markerLabel {
+  opacity: 1;
+}
+
+/* --- locator */
+
+.exp-scan__locator {
+  position: absolute;
+  right: var(--exp-3);
+  bottom: var(--exp-3);
+  width: 84px;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-surface);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--exp-standard) var(--exp-ease-paper),
+    transform var(--exp-standard) var(--exp-ease-paper);
+  pointer-events: none;
+}
+
+.exp-scan__locator[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+.exp-scan__locatorFrame {
+  position: absolute;
+  border: 1.5px solid var(--exp-accent);
+  transition:
+    left var(--exp-slow) var(--exp-ease-focus),
+    top var(--exp-slow) var(--exp-ease-focus),
+    width var(--exp-slow) var(--exp-ease-focus),
+    height var(--exp-slow) var(--exp-ease-focus);
+}
+
+.exp-scan__release {
+  position: absolute;
+  left: var(--exp-3);
+  bottom: var(--exp-3);
+  background: var(--exp-surface-raised);
+  border-color: var(--exp-border-strong);
+}
+
+/* --- readout */
+
+.exp-scan__readout {
+  display: grid;
+  gap: var(--exp-4);
+  align-content: start;
+}
+
+.exp-scan__readoutHead {
+  display: grid;
+  gap: var(--exp-1);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-scan__readings {
+  display: grid;
+  gap: var(--exp-3);
+}
+
+.exp-scan__reading {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--exp-4);
+  align-items: baseline;
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+  animation: exp-reading-in var(--exp-standard) var(--exp-ease-paper) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes exp-reading-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+
+.exp-scan__prompt {
+  max-width: 42ch;
+}
+
+.exp-scan__regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--exp-2);
+}
+
+.exp-scan__regionBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--exp-2);
+  min-height: 44px;
+  padding-inline: var(--exp-3);
+  background: transparent;
+  border: var(--exp-hairline) solid var(--exp-border);
+  color: var(--exp-text-muted);
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--exp-fast) var(--exp-ease-precise),
+    border-color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-scan__regionDot {
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.exp-scan__regionBtn[aria-pressed='true'] {
+  color: var(--exp-accent);
+  border-color: var(--exp-accent);
+}
+
+.exp-scan__regionBtn[aria-pressed='true'] .exp-scan__regionDot {
+  background: var(--exp-accent);
+}
+
+.exp-scan__hint {
+  font-size: 0.76rem;
+  color: var(--exp-text-faint);
+}
+
+/* ==========================================================================
+   04 — EXPEDITION MAP
+   ========================================================================== */
+
+.exp-map {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-map__grid {
+  display: grid;
+  gap: var(--exp-5);
+}
+
+.exp-map[data-band='wide'] .exp-map__grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-map__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+  margin-bottom: var(--exp-4);
+  min-height: 44px;
+}
+
+/* --- field */
+
+.exp-map__field {
+  display: block;
+  width: 100%;
+  aspect-ratio: 200 / 140;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-surface);
+  touch-action: none;
+  contain: layout paint style;
+}
+
+.exp-map__field[data-panning] {
+  cursor: grab;
+}
+
+.exp-map__field[data-panning]:active {
+  cursor: grabbing;
+}
+
+.exp-map__view {
+  transition: transform var(--exp-slow) var(--exp-ease-survey);
+  will-change: transform;
+}
+
+.exp-map__territory {
+  cursor: pointer;
+  transition: opacity var(--exp-standard) var(--exp-ease-survey);
+}
+
+.exp-map__territory[data-dim] {
+  opacity: 0.28;
+}
+
+/* Ground weight carries the depth scale: five strata, five fill steps. The
+   legend says so, so the encoding is readable rather than decorative. */
+.exp-map__hull {
+  fill: rgba(122, 98, 52, calc(0.06 + var(--depth, 1) * 0.035));
+  stroke: var(--exp-border-strong);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+  transition:
+    fill var(--exp-standard) var(--exp-ease-survey),
+    stroke var(--exp-standard) var(--exp-ease-survey);
+}
+
+.exp-map__territory:hover .exp-map__hull {
+  stroke: var(--exp-accent);
+}
+
+.exp-map__territory[data-on] .exp-map__hull {
+  stroke: var(--exp-accent);
+  stroke-width: 1.2;
+}
+
+.exp-map__territory:focus-visible {
+  outline: none;
+}
+
+.exp-map__territory:focus-visible .exp-map__hull {
+  stroke: var(--exp-accent);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+}
+
+.exp-map__name {
+  font-family: var(--exp-font-ui);
+  font-size: 5px;
+  fill: var(--exp-text);
+  letter-spacing: 0.02em;
+}
+
+.exp-map__count {
+  font-family: var(--exp-font-meta);
+  font-size: 3px;
+  fill: var(--exp-text-faint);
+  letter-spacing: 0.18em;
+}
+
+.exp-map__point circle:first-child {
+  fill: var(--exp-text);
+  transition: fill var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-map__pointHit {
+  fill: transparent;
+}
+
+.exp-map__point {
+  cursor: pointer;
+}
+
+.exp-map__point:hover circle:first-child,
+.exp-map__point:focus-visible circle:first-child {
+  fill: var(--exp-accent);
+}
+
+.exp-map__point:focus-visible {
+  outline: none;
+}
+
+.exp-map__point:focus-visible .exp-map__pointHit {
+  fill: none;
+  stroke: var(--exp-accent);
+  stroke-width: 0.8;
+}
+
+.exp-map__legend {
+  margin-top: var(--exp-2);
+  display: block;
+  font-size: 0.62rem;
+}
+
+/* --- panel + finds */
+
+.exp-map__panel {
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+  border-left: var(--exp-hairline) solid var(--exp-border);
+  padding-left: var(--exp-5);
+}
+
+.exp-map[data-band='regular'] .exp-map__panel {
+  border-left: 0;
+  padding-left: 0;
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+  padding-top: var(--exp-4);
+}
+
+.exp-map__brief {
+  font-size: 0.9rem;
+}
+
+.exp-map__finds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-map__find {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-top: var(--exp-hairline) solid var(--exp-border);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--exp-2) 0;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--exp-3);
+  align-items: center;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: padding-left var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-map__find:hover {
+  padding-left: var(--exp-2);
+}
+
+.exp-map__findName {
+  display: block;
+  font-size: 0.92rem;
+}
+
+/* --- compact index */
+
+.exp-map__index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-map__indexRow {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--exp-3) 0;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: var(--exp-3);
+  align-items: center;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.exp-map__glyph {
+  width: 34px;
+  height: auto;
+  fill: rgba(122, 98, 52, 0.16);
+  stroke: var(--exp-border-strong);
+  stroke-width: 1.4;
+  transition: fill var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-map__indexRow[aria-expanded='true'] .exp-map__glyph {
+  fill: var(--exp-accent-soft);
+  stroke: var(--exp-accent);
+}
+
+.exp-map__indexName {
+  font-size: 1rem;
+}
+
+.exp-map__indexRow[aria-expanded='true'] .exp-map__indexName {
+  color: var(--exp-accent);
+}
+
+.exp-map__indexBody {
+  padding: var(--exp-3) 0 var(--exp-4) calc(34px + var(--exp-3));
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+  display: grid;
+  gap: var(--exp-3);
+  animation: exp-settle var(--exp-standard) var(--exp-ease-paper) both;
+}
+
+/* ==========================================================================
+   05 — RESTORATION LAB
+   ========================================================================== */
+
+.exp-lab {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-lab__grid {
+  display: grid;
+  gap: var(--exp-5);
+  grid-template-areas:
+    'head'
+    'bench'
+    'log'
+    'tools';
+}
+
+.exp-lab[data-band='regular'] .exp-lab__grid,
+.exp-lab[data-band='wide'] .exp-lab__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.5fr);
+  grid-template-areas:
+    'head head'
+    'bench tools'
+    'log tools';
+  align-items: start;
+}
+
+.exp-lab__head {
+  grid-area: head;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-lab__headActions {
+  display: flex;
+  gap: var(--exp-2);
+}
+
+/* --- bench */
+
+.exp-lab__bench {
+  grid-area: bench;
+  display: grid;
+  gap: var(--exp-4);
+}
+
+.exp-lab[data-band='wide'] .exp-lab__bench {
+  grid-template-columns: 0.8fr 1fr;
+  align-items: end;
+}
+
+.exp-lab[data-band='regular'] .exp-lab__bench {
+  grid-template-columns: 0.72fr 1fr;
+  align-items: end;
+}
+
+.exp-lab__specimen {
+  margin: 0;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-lab__stage {
+  position: relative;
+  aspect-ratio: 5 / 6;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  overflow: hidden;
+  contain: layout paint style;
+  transition: background-color var(--exp-slow) var(--exp-ease-paper);
+}
+
+.exp-lab__stage[data-muted] {
+  filter: saturate(0.7);
+  opacity: 0.9;
+}
+
+.exp-lab__carrier {
+  position: absolute;
+  inset: 6%;
+}
+
+.exp-lab__carrier > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.exp-lab__motif {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition:
+    left var(--exp-slow) var(--exp-ease-paper),
+    top var(--exp-slow) var(--exp-ease-paper),
+    width var(--exp-standard) var(--exp-ease-precise);
+}
+
+.exp-lab__motif > svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.exp-lab__zoneMark {
+  fill: none;
+  stroke: rgba(27, 26, 24, 0.45);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 2;
+}
+
+.exp-lab__zoneMark[data-on] {
+  stroke: var(--exp-accent);
+  stroke-width: 1.4;
+  stroke-dasharray: none;
+}
+
+/* --- intervention log */
+
+.exp-lab__log {
+  grid-area: log;
+  display: grid;
+  gap: var(--exp-2);
+  align-content: start;
+  border-top: var(--exp-hairline) solid var(--exp-border);
+  padding-top: var(--exp-3);
+}
+
+.exp-lab__logList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-1);
+}
+
+.exp-lab__logList li {
+  display: grid;
+  grid-template-columns: 92px auto 18px auto;
+  gap: var(--exp-3);
+  align-items: center;
+  padding-block: var(--exp-1);
+  font-size: var(--exp-caption-size);
+  animation: exp-reading-in var(--exp-standard) var(--exp-ease-paper) both;
+}
+
+.exp-lab__logFrom {
+  color: var(--exp-text-faint);
+  text-decoration: line-through;
+}
+
+.exp-lab__logTo {
+  color: var(--exp-accent);
+}
+
+/* --- tools */
+
+.exp-lab__tools {
+  grid-area: tools;
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-surface);
+  padding: var(--exp-4);
+}
+
+/* Compact: the tool becomes a tray pinned to the bottom of the viewport, so
+   the specimen keeps the screen and the controls keep the thumb. */
+.exp-lab__tools[data-compact] {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-inline: calc(var(--exp-gutter) * -1);
+  padding-inline: var(--exp-gutter);
+  border-inline: 0;
+  border-bottom: 0;
+  background: var(--exp-surface-raised);
+  box-shadow: 0 -1px 0 var(--exp-border-strong);
+}
+
+.exp-lab__toolTabs {
+  display: flex;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-lab__toolTab {
+  appearance: none;
+  flex: 1 1 0;
+  background: transparent;
+  border: 0;
+  border-left: var(--exp-hairline) solid var(--exp-border-strong);
+  min-height: 44px;
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--exp-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--exp-fast) var(--exp-ease-precise),
+    color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-lab__toolTab:first-child {
+  border-left: 0;
+}
+
+.exp-lab__toolTab[aria-selected='true'] {
+  background: var(--exp-text);
+  color: var(--exp-surface-raised);
+}
+
+.exp-lab__toolPanel {
+  display: grid;
+  gap: var(--exp-3);
+  animation: exp-settle var(--exp-standard) var(--exp-ease-paper) both;
+}
+
+.exp-lab__swatches {
+  display: grid;
+  gap: var(--exp-1);
+}
+
+.exp-lab__swatch {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+  min-height: 48px;
+  padding: var(--exp-2) 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: var(--exp-3);
+  align-items: center;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.exp-lab__swatchChip {
+  width: 28px;
+  height: 28px;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-lab__swatchName {
+  font-size: 0.88rem;
+}
+
+.exp-lab__swatch[aria-pressed='true'] .exp-lab__swatchName {
+  color: var(--exp-accent);
+}
+
+.exp-lab__swatch[aria-pressed='true'] .exp-lab__swatchChip {
+  outline: 2px solid var(--exp-accent);
+  outline-offset: 2px;
+}
+
+.exp-lab__select {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 var(--exp-3);
+  background: var(--exp-surface-raised);
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  color: var(--exp-text);
+  font-family: var(--exp-font-ui);
+  font-size: 0.88rem;
+}
+
+.exp-lab__threads {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+}
+
+.exp-lab__thread {
+  appearance: none;
+  aspect-ratio: 1;
+  min-height: 44px;
+  border: var(--exp-hairline) solid var(--exp-border);
+  cursor: pointer;
+  font-family: var(--exp-font-meta);
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  color: var(--ink, #1b1a18);
+  display: grid;
+  place-items: center;
+  transition: transform var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-lab__thread:hover {
+  transform: translateY(-2px);
+}
+
+.exp-lab__thread[aria-pressed='true'] {
+  outline: 2px solid var(--exp-accent);
+  outline-offset: 1px;
+}
+
+/* The production judgement, coloured by severity. Text carries the meaning;
+   colour only reinforces it. */
+.exp-lab__toolPanel [data-definition='crisp'] {
+  color: var(--exp-success);
+}
+.exp-lab__toolPanel [data-definition='soft'] {
+  color: var(--exp-warning);
+}
+.exp-lab__toolPanel [data-definition='lost'] {
+  color: var(--exp-error);
+}
+
+.exp-lab__carriers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--exp-2);
+}
+
+.exp-lab__carriers .exp-action[aria-pressed='true'] {
+  color: var(--exp-accent);
+  border-color: var(--exp-accent);
+}
+
+.exp-lab__zones {
+  display: grid;
+  gap: 4px;
+}
+
+.exp-lab__zone {
+  appearance: none;
+  background: transparent;
+  border: var(--exp-hairline) solid var(--exp-border);
+  min-height: 44px;
+  padding-inline: var(--exp-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--exp-3);
+  font-family: var(--exp-font-ui);
+  font-size: 0.86rem;
+  color: var(--exp-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.exp-lab__zone[aria-pressed='true'] {
+  border-color: var(--exp-accent);
+  color: var(--exp-accent);
+  background: var(--exp-accent-soft);
+}
+
+/* Range: a measuring scale, not a slider pill. */
+.exp-lab__range {
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.exp-lab__range::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--exp-border-strong);
+}
+
+.exp-lab__range::-moz-range-track {
+  height: 1px;
+  background: var(--exp-border-strong);
+}
+
+.exp-lab__range::-webkit-slider-thumb {
+  appearance: none;
+  width: 3px;
+  height: 22px;
+  margin-top: -11px;
+  background: var(--exp-accent);
+  border: 0;
+}
+
+.exp-lab__range::-moz-range-thumb {
+  width: 3px;
+  height: 22px;
+  background: var(--exp-accent);
+  border: 0;
+  border-radius: 0;
+}
+
+.exp-lab__commit {
+  width: 100%;
+}
+
+/* ==========================================================================
+   06 — FIELD NOTES
+   ========================================================================== */
+
+.exp-notes {
+  display: block;
+  padding-block: var(--exp-7) var(--exp-9);
+}
+
+.exp-notes__grid {
+  display: grid;
+  gap: var(--exp-6);
+}
+
+.exp-notes[data-band='wide'] .exp-notes__grid {
+  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-areas:
+    'head head'
+    'spine stream';
+  column-gap: var(--exp-7);
+  align-items: start;
+}
+
+.exp-notes__head {
+  grid-area: head;
+  display: grid;
+  gap: var(--exp-3);
+  padding-bottom: var(--exp-4);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-notes__title {
+  max-width: 20ch;
+}
+
+/* --- spine index */
+
+.exp-notes__spine {
+  grid-area: spine;
+  position: sticky;
+  top: var(--exp-5);
+}
+
+.exp-notes__spineList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-1);
+  border-left: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-notes__spineItem {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: var(--exp-2);
+  padding: var(--exp-2) var(--exp-3);
+  min-height: 44px;
+  align-items: center;
+  text-decoration: none;
+  color: var(--exp-text-muted);
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  transition:
+    color var(--exp-fast) var(--exp-ease-precise),
+    border-color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-notes__spineItem:hover {
+  color: var(--exp-text);
+}
+
+.exp-notes__spineItem[aria-current='true'] {
+  color: var(--exp-accent);
+  border-left-color: var(--exp-accent);
+}
+
+.exp-notes__spineName {
+  font-size: 0.78rem;
+  line-height: 1.24;
+}
+
+/* --- stream */
+
+.exp-notes__stream {
+  grid-area: stream;
+  display: grid;
+  gap: var(--exp-8);
+}
+
+.exp-notes__entry {
+  display: grid;
+  gap: var(--exp-4);
+  scroll-margin-top: var(--exp-6);
+  /* Resting state is fully readable; the reveal only closes an 18px gap. */
+  opacity: 1;
+  transition:
+    opacity var(--exp-slow) var(--exp-ease-paper),
+    transform var(--exp-slow) var(--exp-ease-paper);
+}
+
+
+.exp-notes[data-band='regular'] .exp-notes__entry,
+.exp-notes[data-band='wide'] .exp-notes__entry {
+  grid-template-columns: 132px minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-areas: 'margin figure text';
+  column-gap: var(--exp-5);
+  align-items: start;
+}
+
+/* Alternation, so the spread reads as facing pages rather than as a list. */
+.exp-notes[data-band='wide'] .exp-notes__entry[data-flip] {
+  grid-template-columns: 132px minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-areas: 'margin text figure';
+}
+
+.exp-notes__margin {
+  grid-area: margin;
+  display: grid;
+  gap: var(--exp-1);
+  align-content: start;
+  border-top: 2px solid var(--exp-text);
+  padding-top: var(--exp-2);
+}
+
+/* Compact: the margin becomes a single stamped line above the entry, because a
+   132px margin column on a 320px screen is a 188px text measure. */
+.exp-notes[data-band='compact'] .exp-notes__margin {
+  grid-template-columns: auto auto auto;
+  justify-content: start;
+  gap: var(--exp-3);
+  align-items: baseline;
+}
+
+.exp-notes__seq {
+  font-family: var(--exp-font-display);
+  font-size: 2.1rem;
+  line-height: 0.9;
+  color: var(--exp-text);
+}
+
+.exp-notes__marginStamp {
+  margin-top: var(--exp-3);
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-notes[data-band='compact'] .exp-notes__marginStamp {
+  display: none;
+}
+
+.exp-notes__marginRow {
+  display: grid;
+  gap: 2px;
+}
+
+.exp-notes__figure {
+  grid-area: figure;
+  margin: 0;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-notes__text {
+  grid-area: text;
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+}
+
+.exp-notes__heading {
+  max-width: 26ch;
+}
+
+.exp-notes__observation {
+  max-width: 52ch;
+}
+
+.exp-notes__technical {
+  border-top: var(--exp-hairline) solid var(--exp-border);
+  padding-top: var(--exp-2);
+  max-width: 52ch;
+  font-size: 0.78rem;
+}
+
+.exp-notes__technical .exp-label {
+  margin-bottom: 2px;
+}
+
+/* ==========================================================================
+   07 — SPECIMEN COMPARISON
+   ========================================================================== */
+
+.exp-cmp {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-cmp__grid {
+  display: grid;
+  gap: var(--exp-5);
+}
+
+.exp-cmp[data-band='wide'] .exp-cmp__grid {
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-areas:
+    'head head'
+    'scale columns'
+    'axes axes'
+    'disclose disclose'
+    'drawer drawer';
+  column-gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-cmp__head {
+  grid-area: head;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-cmp__slots {
+  display: flex;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-cmp__slot {
+  appearance: none;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  border-left: var(--exp-hairline) solid var(--exp-border-strong);
+  font-family: var(--exp-font-meta);
+  font-size: 0.8rem;
+  color: var(--exp-text-muted);
+  cursor: pointer;
+}
+
+.exp-cmp__slot:first-child {
+  border-left: 0;
+}
+
+.exp-cmp__slot[aria-selected='true'] {
+  background: var(--exp-text);
+  color: var(--exp-surface-raised);
+}
+
+.exp-cmp__empty {
+  padding-block: var(--exp-7);
+  text-align: center;
+}
+
+/* --- true-scale frame */
+
+.exp-cmp__scale {
+  grid-area: scale;
+  margin: 0;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-cmp__scale > svg {
+  width: 100%;
+  height: auto;
+  background: var(--exp-surface);
+  border: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-cmp__scaleBox {
+  fill: none;
+  stroke: var(--exp-border);
+  stroke-dasharray: 3 3;
+}
+
+.exp-cmp__scaleItem {
+  color: var(--exp-text-faint);
+  opacity: 0.35;
+  transition: opacity var(--exp-standard) var(--exp-ease-focus);
+}
+
+.exp-cmp__scaleItem[data-on] {
+  color: var(--exp-accent);
+  opacity: 1;
+}
+
+/* --- columns */
+
+.exp-cmp__columns {
+  grid-area: columns;
+  display: grid;
+  gap: var(--exp-4);
+  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+}
+
+.exp-cmp__columns[data-count='2'] {
+  --n: 2;
+}
+.exp-cmp__columns[data-count='3'] {
+  --n: 3;
+}
+
+.exp-cmp[data-band='compact'] .exp-cmp__columns {
+  --n: 1;
+}
+
+.exp-cmp__column {
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+  animation: exp-settle var(--exp-standard) var(--exp-ease-paper) both;
+}
+
+.exp-cmp__columnHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--exp-2);
+  align-items: center;
+  padding-bottom: var(--exp-2);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+.exp-cmp__letter {
+  font-family: var(--exp-font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--exp-accent);
+}
+
+.exp-cmp__columnHead .exp-meta {
+  display: block;
+}
+
+.exp-cmp__remove {
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 1rem;
+}
+
+.exp-cmp__threads {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-1);
+  animation: exp-settle var(--exp-standard) var(--exp-ease-paper) both;
+}
+
+.exp-cmp__threads li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: var(--exp-2);
+  align-items: center;
+}
+
+.exp-cmp__threadChip {
+  width: 16px;
+  height: 16px;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+/* --- registered axes */
+
+.exp-cmp__axes {
+  grid-area: axes;
+  display: grid;
+  gap: var(--exp-4);
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+  padding-top: var(--exp-4);
+}
+
+.exp-cmp[data-band='wide'] .exp-cmp__axes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--exp-7);
+}
+
+.exp-cmp__axis {
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-cmp__axisLine {
+  position: relative;
+  height: 24px;
+  margin-inline: 12px;
+}
+
+.exp-cmp__axisLine::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  right: -12px;
+  top: 11px;
+  height: 1px;
+  background: var(--exp-border-strong);
+}
+
+/* Tick marks at the ends, so the line reads as a measured scale. */
+.exp-cmp__axisLine::after {
+  content: '';
+  position: absolute;
+  left: -12px;
+  right: -12px;
+  top: 5px;
+  height: 13px;
+  border-left: 1px solid var(--exp-border-strong);
+  border-right: 1px solid var(--exp-border-strong);
+}
+
+.exp-cmp__mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  transition:
+    left var(--exp-slow) var(--exp-ease-focus),
+    opacity var(--exp-standard) var(--exp-ease-focus);
+  opacity: 0.35;
+}
+
+.exp-cmp__mark[data-on] {
+  opacity: 1;
+}
+
+.exp-cmp__markLetter {
+  font-family: var(--exp-font-meta);
+  font-size: 0.6rem;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--exp-surface-raised);
+  border: 1px solid var(--exp-text);
+  color: var(--exp-text);
+}
+
+.exp-cmp__mark[data-on] .exp-cmp__markLetter {
+  border-color: var(--exp-accent);
+  color: var(--exp-accent);
+}
+
+.exp-cmp__axisValues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--exp-3);
+}
+
+.exp-cmp__axisValues > span {
+  opacity: 0.45;
+}
+
+.exp-cmp__axisValues > span[data-on] {
+  opacity: 1;
+}
+
+.exp-cmp__axisNote {
+  grid-column: 1 / -1;
+  font-size: 0.74rem;
+}
+
+.exp-cmp__disclose {
+  grid-area: disclose;
+  justify-self: start;
+}
+
+/* --- drawer */
+
+.exp-cmp__drawer {
+  grid-area: drawer;
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+  padding-top: var(--exp-3);
+  display: grid;
+  gap: var(--exp-3);
+}
+
+.exp-cmp__pool {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 30%;
+  gap: var(--exp-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--exp-2);
+}
+
+.exp-cmp[data-band='wide'] .exp-cmp__pool {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.exp-cmp__poolItem {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: var(--exp-1);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  scroll-snap-align: start;
+}
+
+.exp-cmp__poolItem[aria-pressed='true'] .exp-plate {
+  outline: 2px solid var(--exp-accent);
+  outline-offset: -2px;
+}
+
+.exp-cmp__poolItem:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.exp-cmp__poolName {
+  font-size: 0.76rem;
+  line-height: 1.24;
+}
+
+/* ==========================================================================
+   08 — MATERIAL VAULT
+   ========================================================================== */
+
+.exp-vault {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-vault__grid {
+  display: grid;
+  gap: var(--exp-5);
+  grid-template-areas:
+    'head'
+    'cabinet'
+    'record'
+    'test';
+}
+
+.exp-vault[data-band='regular'] .exp-vault__grid,
+.exp-vault[data-band='wide'] .exp-vault__grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  grid-template-areas:
+    'head head'
+    'cabinet record'
+    'test record';
+  column-gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-vault__head {
+  grid-area: head;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+/* --- cabinet */
+
+.exp-vault__cabinet {
+  grid-area: cabinet;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--exp-2);
+  background: var(--exp-surface-sunken);
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  padding: var(--exp-3);
+}
+
+/* Compact: the cabinet is a shelf you scroll along, not five 56px slivers. */
+.exp-vault[data-band='compact'] .exp-vault__cabinet {
+  grid-auto-columns: 42%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+.exp-vault__drawer {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  display: grid;
+  gap: var(--exp-2);
+  scroll-snap-align: start;
+  text-align: left;
+  position: relative;
+}
+
+/* The empty slot behind the sample — what makes the pull read as a pull. */
+.exp-vault__slot {
+  position: absolute;
+  inset: 0 0 auto 0;
+  aspect-ratio: 3 / 4;
+  background: rgba(27, 26, 24, 0.14);
+  border: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-vault__sample {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  overflow: hidden;
+  transition:
+    transform var(--exp-standard) var(--exp-ease-paper),
+    outline-color var(--exp-fast) var(--exp-ease-precise);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  will-change: transform;
+}
+
+.exp-vault__drawer:hover .exp-vault__sample {
+  transform: translateY(-6px);
+}
+
+/* Pulled out of the cabinet: forward, up, and off-square by half a degree, so
+   it reads as a physical sample lying on the bench. */
+.exp-vault__drawer[data-on] .exp-vault__sample {
+  transform: translateY(-16px) scale(1.06) rotate(var(--tilt, -0.5deg));
+  outline-color: var(--exp-accent);
+}
+
+.exp-vault__sampleWeave {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px var(--pitch, 5px)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px var(--pitch, 5px));
+}
+
+.exp-vault__sampleEdge {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.26), transparent 45%, rgba(0, 0, 0, 0.18));
+}
+
+.exp-vault__drawerLabel {
+  display: grid;
+  gap: 1px;
+}
+
+.exp-vault__drawerName {
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.exp-vault__drawer[data-on] .exp-vault__drawerName {
+  color: var(--exp-accent);
+}
+
+/* --- record + test strip */
+
+.exp-vault__record {
+  grid-area: record;
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+  border: var(--exp-hairline) solid var(--exp-border);
+  background: var(--exp-surface);
+  padding: var(--exp-4);
+}
+
+.exp-vault__stamp {
+  padding-block: var(--exp-3);
+  border-block: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-vault__note {
+  max-width: 46ch;
+}
+
+.exp-vault__test {
+  grid-area: test;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+.exp-vault__strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  padding: var(--exp-4) var(--exp-3);
+  transition: background-color var(--exp-standard) var(--exp-ease-paper);
+}
+
+.exp-vault__stitch {
+  appearance: none;
+  background: none;
+  border: 0;
+  min-height: 52px;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  gap: var(--exp-2);
+  justify-items: center;
+  align-content: center;
+}
+
+/* A run of satin stitch in the thread, drawn on the ground itself — the only
+   honest way to show whether a thread will read on a cloth. */
+.exp-vault__stitchRun {
+  width: 100%;
+  height: 14px;
+  background-image: repeating-linear-gradient(
+    74deg,
+    var(--thread) 0 3px,
+    rgba(0, 0, 0, 0.16) 3px 4px
+  );
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: transform var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-vault__stitch:hover .exp-vault__stitchRun {
+  transform: scaleY(1.35);
+}
+
+.exp-vault__stitch[aria-pressed='true'] .exp-vault__stitchRun {
+  transform: scaleY(1.6);
+}
+
+.exp-vault__stitchCode {
+  color: var(--ink);
+  opacity: 0.6;
+  font-size: 0.56rem;
+}
+
+.exp-vault__stitch[aria-pressed='true'] .exp-vault__stitchCode {
+  opacity: 1;
+}
+
+.exp-vault__test [data-definition='crisp'] {
+  color: var(--exp-success);
+}
+.exp-vault__test [data-definition='soft'] {
+  color: var(--exp-warning);
+}
+.exp-vault__test [data-definition='lost'] {
+  color: var(--exp-error);
+}
+
+.exp-vault__hint {
+  font-size: 0.74rem;
+  color: var(--exp-text-faint);
+}
+
+/* ==========================================================================
+   09 — ACQUISITION DESK
+   ========================================================================== */
+
+.exp-desk {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-8);
+}
+
+.exp-desk__grid {
+  display: grid;
+  gap: var(--exp-5);
+  grid-template-areas:
+    'head'
+    'figure'
+    'sheet'
+    'actions';
+}
+
+.exp-desk[data-band='regular'] .exp-desk__grid {
+  grid-template-columns: 0.8fr 1.2fr;
+  grid-template-areas:
+    'head head'
+    'figure sheet'
+    'actions actions';
+  column-gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-desk[data-band='wide'] .exp-desk__grid {
+  grid-template-columns: 0.62fr 1fr 0.72fr;
+  grid-template-areas:
+    'head head head'
+    'figure sheet actions';
+  column-gap: var(--exp-6);
+  align-items: start;
+}
+
+.exp-desk__head {
+  grid-area: head;
+  display: grid;
+  gap: var(--exp-1);
+  padding-bottom: var(--exp-3);
+  border-bottom: 2px solid var(--exp-text);
+}
+
+.exp-desk__figure {
+  grid-area: figure;
+  margin: 0;
+  display: grid;
+  gap: var(--exp-2);
+}
+
+/* --- ledger */
+
+.exp-desk__sheet {
+  grid-area: sheet;
+  display: grid;
+  gap: var(--exp-4);
+  align-content: start;
+}
+
+.exp-desk__ledger {
+  display: grid;
+  margin: 0;
+}
+
+.exp-desk__line {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.55fr) minmax(0, 1fr);
+  gap: var(--exp-4);
+  align-items: baseline;
+  padding-block: var(--exp-2);
+  border-bottom: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-desk__line dt {
+  font-family: var(--exp-font-meta);
+  font-size: var(--exp-label-size);
+  letter-spacing: var(--exp-label-tracking);
+  text-transform: uppercase;
+  color: var(--exp-text-faint);
+}
+
+.exp-desk__line dd {
+  margin: 0;
+  font-size: var(--exp-caption-size);
+  font-variant-numeric: tabular-nums;
+  /* Re-stamp: the value is keyed on itself in JSX, so a changed figure
+     remounts and plays this once. Nothing else on the sheet moves. */
+  animation: exp-restamp var(--exp-standard) var(--exp-ease-precise) both;
+}
+
+@keyframes exp-restamp {
+  from {
+    opacity: 0.2;
+    transform: translateY(-2px);
+  }
+}
+
+.exp-desk__line[data-emphasis] {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--exp-text);
+  padding-block: var(--exp-3);
+}
+
+.exp-desk__line[data-emphasis] dt {
+  color: var(--exp-text);
+}
+
+.exp-desk__line[data-emphasis] dd {
+  font-family: var(--exp-font-display);
+  font-size: 1.5rem;
+}
+
+.exp-desk__interventions ul {
+  list-style: none;
+  margin: var(--exp-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-1);
+}
+
+.exp-desk__interventions li {
+  display: grid;
+  grid-template-columns: 92px auto auto auto;
+  gap: var(--exp-2);
+  align-items: baseline;
+  font-size: var(--exp-caption-size);
+}
+
+.exp-desk__from {
+  color: var(--exp-text-faint);
+  text-decoration: line-through;
+}
+
+.exp-desk__to {
+  color: var(--exp-accent);
+}
+
+.exp-desk__production {
+  display: grid;
+  gap: var(--exp-2);
+  border-top: var(--exp-hairline) solid var(--exp-border);
+  padding-top: var(--exp-3);
+}
+
+/* --- the desk itself */
+
+.exp-desk__actions {
+  grid-area: actions;
+  display: grid;
+  gap: var(--exp-4);
+  align-content: start;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-surface-raised);
+  padding: var(--exp-4);
+}
+
+/* Compact: the desk is pinned to the bottom of the viewport so the acquisition
+   action is always one thumb away, while the ledger scrolls behind it. */
+.exp-desk__actions[data-compact] {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-inline: calc(var(--exp-gutter) * -1);
+  padding-inline: var(--exp-gutter);
+  border-inline: 0;
+  border-bottom: 0;
+  gap: var(--exp-3);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'qty total'
+    'commit commit'
+    'foot foot';
+  box-shadow: 0 -1px 0 var(--exp-border-strong);
+}
+
+.exp-desk__actions[data-compact] .exp-desk__qty {
+  grid-area: qty;
+}
+.exp-desk__actions[data-compact] .exp-desk__total {
+  grid-area: total;
+  text-align: right;
+}
+.exp-desk__actions[data-compact] .exp-desk__commit {
+  grid-area: commit;
+}
+.exp-desk__actions[data-compact] .exp-desk__foot {
+  grid-area: foot;
+}
+
+.exp-desk__qty {
+  display: grid;
+  gap: var(--exp-2);
+  justify-items: start;
+}
+
+.exp-desk__stepper {
+  display: flex;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+  background: var(--exp-surface);
+}
+
+.exp-desk__step {
+  appearance: none;
+  width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  font-size: 1.1rem;
+  color: var(--exp-text);
+  cursor: pointer;
+  transition: background-color var(--exp-fast) var(--exp-ease-precise);
+}
+
+.exp-desk__step:hover:not(:disabled) {
+  background: rgba(27, 26, 24, 0.06);
+}
+
+.exp-desk__step:disabled {
+  color: var(--exp-text-faint);
+  cursor: not-allowed;
+}
+
+.exp-desk__qtyInput {
+  width: 56px;
+  min-height: 44px;
+  text-align: center;
+  border: 0;
+  border-inline: var(--exp-hairline) solid var(--exp-border-strong);
+  background: transparent;
+  font-family: var(--exp-font-meta);
+  font-size: 0.9rem;
+  color: var(--exp-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-desk__ceiling {
+  display: block;
+}
+
+.exp-desk__total {
+  display: grid;
+  gap: 2px;
+}
+
+.exp-desk__totalValue {
+  font-family: var(--exp-font-display);
+  font-size: clamp(2rem, 1.4rem + 2vw, 2.8rem);
+  line-height: 1;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  animation: exp-restamp var(--exp-standard) var(--exp-ease-precise) both;
+}
+
+.exp-desk__commit {
+  width: 100%;
+  min-height: 52px;
+  font-size: var(--exp-metadata-size);
+}
+
+.exp-desk__commit[aria-busy='true'] {
+  cursor: progress;
+}
+
+.exp-desk__foot {
+  font-size: 0.74rem;
+  max-width: 46ch;
+}
+
+.exp-desk__foot[role='alert'] {
+  color: var(--exp-error);
+}
+
+/* ==========================================================================
+   10 — COLLECTION VAULT
+   ========================================================================== */
+
+.exp-room {
+  display: block;
+  padding-block: var(--exp-6) var(--exp-9);
+}
+
+.exp-room__grid {
+  display: grid;
+  gap: var(--exp-6);
+}
+
+.exp-room__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--exp-4);
+  padding-bottom: var(--exp-3);
+  border-bottom: 2px solid var(--exp-text);
+}
+
+.exp-room__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--exp-2);
+}
+
+/* --- the wall */
+
+.exp-room__wall {
+  margin: 0;
+  display: grid;
+  gap: var(--exp-5);
+}
+
+.exp-room[data-band='wide'] .exp-room__wall {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  column-gap: var(--exp-7);
+  align-items: start;
+}
+
+.exp-room[data-band='regular'] .exp-room__wall {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+  column-gap: var(--exp-5);
+  align-items: start;
+}
+
+.exp-room__dominant {
+  animation: exp-hang var(--exp-cinematic) var(--exp-ease-focus) both;
+  border: var(--exp-hairline) solid var(--exp-border-strong);
+}
+
+/* The hang: a piece arrives on the wall by settling, not by sliding in from
+   off-screen. One transform, one opacity, once. */
+@keyframes exp-hang {
+  from {
+    opacity: 0;
+    transform: scale(1.012) translateY(-6px);
+  }
+}
+
+.exp-room__caption {
+  display: grid;
+  gap: var(--exp-3);
+  align-content: start;
+}
+
+.exp-room__title {
+  font-size: clamp(2rem, 1.2rem + 3.2vw, 3.4rem);
+  max-width: 18ch;
+}
+
+.exp-room__narrative {
+  max-width: 46ch;
+}
+
+.exp-room__stamp {
+  padding-block: var(--exp-3);
+  border-block: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-room__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--exp-3);
+}
+
+/* --- the ring */
+
+.exp-room__ring {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 46%;
+  gap: var(--exp-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--exp-2);
+  border-top: var(--exp-hairline) solid var(--exp-border-strong);
+  padding-top: var(--exp-4);
+}
+
+/* Rank as layout: the second piece in the hang is larger than the third, which
+   is larger than the fourth, so the room has a visible order rather than five
+   equal thumbnails. */
+.exp-room[data-band='wide'] .exp-room__ring {
+  grid-auto-flow: row;
+  grid-template-columns: 1.4fr 1.15fr 1fr 1fr 0.9fr;
+  overflow: visible;
+  align-items: start;
+}
+
+.exp-room[data-band='regular'] .exp-room__ring {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.exp-room__support {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--exp-2);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+  /* Rank drives how far back in the room a piece reads. Opacity only — the
+     plate itself is never scaled down to a blur. */
+  opacity: calc(1 - var(--rank, 0) * 0.09);
+  transition:
+    transform var(--exp-standard) var(--exp-ease-paper),
+    opacity var(--exp-standard) var(--exp-ease-paper);
+}
+
+.exp-room__support:hover {
+  transform: translateY(-5px);
+  opacity: 1;
+}
+
+.exp-room__support .exp-plate {
+  border: var(--exp-hairline) solid var(--exp-border);
+}
+
+.exp-room__supportLabel {
+  display: grid;
+  gap: 1px;
+}
+
+.exp-room__supportName {
+  font-size: 0.86rem;
+  line-height: 1.24;
+}
+
+.exp-room__support:hover .exp-room__supportName {
+  color: var(--exp-accent);
+}
+
+/* ==========================================================================
+   FIXES / EXCEPTIONS
+   ========================================================================== */
+
+/* The rail centres its items, which collapses a plate to its intrinsic width
+   (zero — a plate is a box with no content of its own). Plates in a centred
+   track have to be told to fill it. */
+.exp-cat__railItem .exp-plate,
+.exp-room__ring .exp-plate {
+  width: 100%;
+}
+
+/* The readings list inherits `.exp-stamp`'s two-track grid, which would lay the
+   rows out two-up; each reading is already a two-column row of its own. */
+.exp-scan__readings {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Chrome paints its own `auto` focus ring on a focusable <g> — a 5px rounded
+   ring around the territory's bounding box, which reads as a highlight over
+   the map rather than as focus. Suppressed on :focus (including the ring a
+   click leaves behind) and replaced with a dashed stroke on the hull itself,
+   which is both quieter and actually shaped like the thing it is marking. */
+.exp-map__territory:focus,
+.exp-map__point:focus {
+  outline: none;
+}
+
+/* Same exception as the scanner's readings: where `.exp-stamp` rows are
+   wrapped in their own elements, the wrapper owns the two tracks and the list
+   itself has to become a single column. */
+.exp-notes__marginStamp {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.exp-notes__marginRow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Named areas must exist in *every* band a named child renders in. Where the
+   template only existed at `wide`, the named children fell back to auto
+   placement and stacked at 1/1 — the section drew on top of itself. Both grids
+   now declare a single-column stack as their base, which every band inherits
+   unless it names its own. */
+.exp-cmp__grid {
+  grid-template-areas:
+    'head'
+    'scale'
+    'columns'
+    'axes'
+    'disclose'
+    'drawer';
+}
+
+.exp-cmp[data-band='regular'] .exp-cmp__grid {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-areas:
+    'head head'
+    'scale columns'
+    'axes axes'
+    'disclose disclose'
+    'drawer drawer';
+  column-gap: var(--exp-5);
+  align-items: start;
+}
+
+.exp-notes__grid {
+  grid-template-areas:
+    'head'
+    'spine'
+    'stream';
+}
+
+/* The reveal's hidden state is gated on the stream having actually armed it
+   (see FieldNotes' layout effect). Without the flag every entry renders at its
+   resting, readable state — the journal is never hidden by a script that did
+   not run. */
+.exp-notes__stream[data-armed] .exp-notes__entry:not([data-seen]) {
+  opacity: 0.001;
+  transform: translateY(18px);
+}

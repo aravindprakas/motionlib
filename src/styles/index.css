@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.motion-library-sidebar { inline-size: clamp(15rem,22vw,19rem); }
+.motion-library-mobile-select { display:none; }
+@media (max-width:700px) {
+  .motion-library-app { flex-direction:column; }
+  .motion-library-sidebar { inline-size:100%; border-right:0; }
+  .motion-library-brand { padding: .8rem 1rem; }
+  .motion-library-brand > a { font-size:1.15rem; }
+  .motion-library-brand > p { display:none; }
+  .motion-library-component-nav, .motion-library-sidebar-footer { display:none; }
+  .motion-library-mobile-select { display:flex; align-items:center; gap:.8rem; padding:.65rem 1rem; border-bottom:1px solid #0c0b0e; }
+  .motion-library-mobile-select select { flex:1; min-inline-size:0; font-size:.75rem; background:transparent; padding:.3rem; border:1px solid #0c0b0e; }
+}
+
+@layer base {
+  :root {
+    --color-bone: #ece6d8;
+    --color-ink: #0c0b0e;
+    --color-vermilion: #ff4d23;
+    /* Aliases used in inline styles of components ported from the Store. */
+    --color-paper: var(--color-bone);
+    --color-accent: var(--color-vermilion);
+    /* Semantic aliases referenced inline (fill/stroke) by the Showcase set,
+       re-skinned onto the brutalist palette. */
+    --color-popover: var(--color-bone);
+    --color-muted-foreground: rgba(12, 11, 14, 0.6);
+    --color-border-strong: rgba(12, 11, 14, 0.3);
+    /* Easing used by the Projects section's scroll-reveal choreography. */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* "Scroll Secrets" imported showcase set — warm, Apple-like palette scoped to
+     its own subtree so it never leaks onto the brutalist library. Component
+     files reference these via var-backed Tailwind colors (see tailwind.config).
+     Values are RGB triplets so Tailwind's `<alpha-value>` opacity modifiers
+     (e.g. text-foreground/60) keep working. */
+  .ss-theme {
+    --ss-background: 250 248 245;
+    --ss-foreground: 26 26 26;
+    --ss-card: 255 255 255;
+    --ss-card-foreground: 26 26 26;
+    --ss-primary: 58 58 58;
+    --ss-primary-foreground: 250 248 245;
+    --ss-secondary: 240 236 227;
+    --ss-secondary-foreground: 26 26 26;
+    --ss-muted: 236 232 223;
+    --ss-muted-foreground: 122 122 122;
+    --ss-border: 228 223 214;
+    --ss-ring: 201 168 76;
+    /* Warm gold accent, overriding the library's vermilion within this scope. */
+    --accent-rgb: 201 168 76;
+    background-color: rgb(var(--ss-background));
+    color: rgb(var(--ss-foreground));
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* App Shell set — a soft, light/dark product surface scoped to its own
+     subtree so it never leaks onto the brutalist library. The set is a
+     deliberate departure from the house tokens (24px radii, real shadows,
+     white/near-black grounds) because it is a working application chrome, not a
+     specimen plate; scoping it is what keeps both true at once. Same pattern as
+     .ss-theme above. */
+  .shell-theme {
+    --shell-radius-card: 24px;
+    --shell-radius-control: 14px;
+    --shell-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.011em;
+  }
+
+  .shell-theme ::selection {
+    background-color: rgb(99 102 241 / 0.2);
+    color: inherit;
+  }
+
+  /* The CSS half of the set's staggered reveals (DataTable rows, footer links)
+     is an animation with an opacity-0 start, so it has to be neutralised — not
+     just stopped — under reduced motion, or the rows stay invisible forever. */
+  @media (prefers-reduced-motion: reduce) {
+    .shell-theme [data-shell-reveal] {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .shell-theme *,
+    .shell-theme *::before,
+    .shell-theme *::after {
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bone font-display text-ink antialiased;
+  }
+
+  ::selection {
+    @apply bg-vermilion text-bone;
+  }
+
+  /* Crisp editorial scrollbars - no rounded thumbs. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme('colors.bone');
+    border-left: 1px solid theme('colors.ink');
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.ink');
+  }
+}
+
+/* Utilities used by the Showcase set (ported from a Tailwind v4 project that
+   declared these as @utility). Redeclared here for Tailwind v3. Typography and
+   scrollbar helpers are palette-neutral; elevation shadows are re-tuned to the
+   brutalist ink so they read as hard offsets, not soft material shadows. */
+@layer utilities {
+  .font-mono-tight {
+    font-family: theme('fontFamily.mono');
+    font-feature-settings: 'tnum', 'ss01';
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .tracking-display {
+    letter-spacing: -0.03em;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .shadow-elev-1 {
+    box-shadow: 2px 2px 0 rgba(12, 11, 14, 0.08);
+  }
+  .shadow-elev-2 {
+    box-shadow: 3px 3px 0 rgba(12, 11, 14, 0.14);
+  }
+  .shadow-elev-3 {
+    box-shadow: 6px 6px 0 rgba(12, 11, 14, 0.9);
+  }
+  /* Fine specimen-grain overlay for the cinematic showcase stages. */
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+}

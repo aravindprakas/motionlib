@@ -1,0 +1,17 @@
+import { useMemo, useState } from 'react';
+import { AdaptiveCommandPalette, type PaletteCommand } from './AdaptiveCommandPalette';
+import type { AsyncSurfaceProps } from '@/lib/chatgpt';
+export default function Demo(props: AsyncSurfaceProps) {
+  const [name, setName] = useState('The next good thing');
+  const [archived, setArchived] = useState(false);
+  const [context, setContext] = useState('Workspace');
+  const commands = useMemo<PaletteCommand[]>(() => [
+    { id: 'rename', label: 'Rename the project', category: 'Project', description: `Give “${name}” a new name. You can undo this change.`, argument: { label: 'New name', placeholder: 'A new beginning', required: true }, execute: value => { const previous = name; setName(value); return { message: `Renamed to “${value}”.`, undo: () => setName(previous) }; } },
+    { id: 'export', label: 'Export workspace', category: 'Workspace', description: 'Download a JSON snapshot of this demo workspace to your device.', shortcut: 'Alt E', execute: async (_value, signal) => { const blob = new Blob([JSON.stringify({ name, archived, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' }); await blob.text(); if (signal.aborted) return; const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'workspace.json'; link.click(); URL.revokeObjectURL(url); return { message: 'Workspace exported to your device.' }; } },
+    { id: 'organize', label: 'Organize your space', category: 'Workspace', description: 'A few small actions that keep your workspace considered.', children: [{ id: 'restore', label: 'Restore the project', category: 'Organization', description: 'Bring this project back into your active workspace.', execute: () => { const previous = archived; setArchived(false); return { message: 'Project is active.', undo: () => setArchived(previous) }; } }, { id: 'reset-name', label: 'Use the original name', category: 'Organization', description: 'Return the project to its first name.', execute: () => { const previous = name; setName('The next good thing'); return { message: 'Original name restored.', undo: () => setName(previous) }; } }] },
+    { id: 'summarize', label: 'Read the selected note', category: 'Selection', context: 'Note selected', description: 'This command appears only when a note is selected.', execute: () => ({ message: 'Note: build less, learn sooner, notice more.' }) },
+    { id: 'parse', label: 'Validate JSON', category: 'Tools', description: 'Parse a JSON argument locally. Invalid JSON shows a recoverable error.', argument: { label: 'JSON', placeholder: '{ "idea": "clarity" }', required: true }, execute: value => { JSON.parse(value); return { message: 'Valid JSON. Ready to use.' }; } },
+    { id: 'archive', label: 'Archive the project', category: 'Project', description: 'Move this project out of the active workspace. Confirmation is required; you can undo it.', destructive: true, execute: () => { const previous = archived; setArchived(true); return { message: 'Project archived.', undo: () => setArchived(previous) }; } },
+  ], [name, archived]);
+  return <><div className="cg-demo-context"><span>{name} <small>/{archived ? ' Archived' : ' Active'}</small></span><select aria-label="Selected object context" value={context} onChange={e => setContext(e.target.value)}><option>Workspace</option><option>Note selected</option></select></div><AdaptiveCommandPalette commands={commands} context={context} {...props}/></>;
+}
